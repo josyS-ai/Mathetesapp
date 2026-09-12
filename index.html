@@ -220,8 +220,12 @@
       <div><label class="text-xs text-gray-500">Date de naissance</label><input id="d-naissance" type="date"></div>
       <div><label class="text-xs text-gray-500">Année de conversion</label><input id="d-conversion" type="number" placeholder="ex: 2021"></div>
       <div><label class="text-xs text-gray-500">Date d'arrivée</label><input id="d-arrivee" type="date"></div>
-      <div class="flex gap-1"><select id="d-statut" class="flex-1"></select><button type="button" class="btn-outline px-2" title="Ajouter un statut" onclick="quickAddStatut()">+</button></div>
-      <div class="flex gap-1"><select id="d-etape" class="flex-1"></select><button type="button" class="btn-outline px-2" title="Ajouter une étape" onclick="quickAddEtape()">+</button></div>
+      <div><select id="d-statut" onchange="handleStatutSelect(this)"></select>
+        <div id="d-statut-newbox" class="hidden flex gap-1 mt-1"><input id="d-statut-newval" placeholder="Nom du nouveau statut"><button type="button" class="btn-outline" onclick="confirmNewStatut()">Ajouter</button></div>
+      </div>
+      <div><select id="d-etape" onchange="handleEtapeSelect(this)"></select>
+        <div id="d-etape-newbox" class="hidden flex gap-1 mt-1"><input id="d-etape-newval" placeholder="Nom de la nouvelle étape"><button type="button" class="btn-outline" onclick="confirmNewEtape()">Ajouter</button></div>
+      </div>
       <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="d-baptise" class="w-auto"> Baptisé(e) d'eau ?</label>
       <input id="d-tel" placeholder="Téléphone">
     </div>
@@ -264,7 +268,8 @@
     </div>
     <div class="grid md:grid-cols-2 gap-2 mb-3">
       <input id="s-date" type="date">
-      <input id="s-theme" placeholder="Thème / enseignement du jour">
+      <input id="s-exhortation" placeholder="Thème Exhortation">
+      <input id="s-theme" placeholder="Thème Enseignement" class="md:col-span-2">
     </div>
     <div class="mb-3">
       <label class="text-xs text-gray-500">Statut du thème</label>
@@ -272,8 +277,16 @@
     </div>
     <h4 class="text-sm font-semibold mb-1" style="color:var(--navy)">Présences</h4>
     <div id="s-presence-list" class="grid md:grid-cols-2 gap-1 mb-3 max-h-40 overflow-y-auto text-sm"></div>
+    <textarea id="s-point-arret" rows="2" placeholder="📍 Progression / Point d'arrêt (Où s'est-on arrêté ?)" class="mb-3"></textarea>
     <textarea id="s-qse" rows="2" placeholder="Questions au Saint-Esprit" class="mb-2"></textarea>
+    <textarea id="s-revelations" rows="2" placeholder="Révélations" class="mb-2"></textarea>
     <textarea id="s-obs" rows="2" placeholder="Observations / annotations supports" class="mb-2"></textarea>
+    <div id="s-rubrique-box" class="hidden mb-2">
+      <label id="s-rubrique-label" class="text-xs text-gray-500"></label>
+      <textarea id="s-rubrique-valeur" rows="2"></textarea>
+    </div>
+    <button type="button" id="s-rubrique-add-btn" class="text-xs underline mb-3" onclick="toggleRubriqueSetup()">+ Ajouter une rubrique personnalisée (répétée à chaque séance)</button>
+    <div id="s-rubrique-setup" class="hidden flex gap-1 mb-3"><input id="s-rubrique-label-new" placeholder="Nom de la rubrique (ex: Verset à mémoriser)"><button class="btn-outline" onclick="saveRubriqueLabel()">Valider</button></div>
     <h4 class="text-sm font-semibold mb-1" style="color:var(--navy)">To-do list</h4>
     <div id="s-todo-list" class="space-y-1 mb-2"></div>
     <div class="flex gap-2 mb-3"><input id="s-todo-new" placeholder="Nouvelle tâche"><button class="btn-outline" onclick="addTodoItem()">Ajouter</button></div>
@@ -289,17 +302,17 @@
       <h3 class="font-display font-bold text-lg" style="color:var(--navy)">Statuts & étapes du parcours</h3>
       <button onclick="closeModal('modal-config')">✕</button>
     </div>
-    <p class="text-xs text-gray-500 mb-3">Personnalisez selon le compte actif (<span id="cfg-account-label"></span>). Supprimer un statut/une étape n'affecte pas les fiches déjà enregistrées.</p>
+    <p class="text-xs text-gray-500 mb-3">Personnalisez selon le compte actif (<span id="cfg-account-label"></span>). Modifiez le nom directement dans la case, ou supprimez avec ✕.</p>
     <div class="grid md:grid-cols-2 gap-4">
       <div>
         <h4 class="text-sm font-semibold mb-2" style="color:var(--navy)">Statuts</h4>
         <div id="cfg-statuts-list" class="space-y-1 mb-2 text-sm"></div>
-        <div class="flex gap-1"><input id="cfg-statut-new" placeholder="Nouveau statut"><button class="btn-outline" onclick="addStatut()">+</button></div>
+        <div class="flex gap-1"><input id="cfg-statut-new" placeholder="+ Nouveau statut"><button class="btn-outline" onclick="addStatut()">Ajouter</button></div>
       </div>
       <div>
         <h4 class="text-sm font-semibold mb-2" style="color:var(--navy)">Étapes du parcours</h4>
         <div id="cfg-etapes-list" class="space-y-1 mb-2 text-sm"></div>
-        <div class="flex gap-1"><input id="cfg-etape-new" placeholder="Nouvelle étape"><button class="btn-outline" onclick="addEtape()">+</button></div>
+        <div class="flex gap-1"><input id="cfg-etape-new" placeholder="+ Nouvelle étape"><button class="btn-outline" onclick="addEtape()">Ajouter</button></div>
       </div>
     </div>
   </div>
@@ -432,12 +445,37 @@ async function loadConfig(){
   fillStatutEtapeSelects();
 }
 function fillStatutEtapeSelects(){
-  const optS = statuts.map(s=>`<option>${s.nom}</option>`).join('');
-  const optE = etapes.map(e=>`<option>${e.nom}</option>`).join('');
+  const optS = statuts.map(s=>`<option value="${s.nom}">${s.nom}</option>`).join('') + `<option value="__add__">+ Nouveau statut...</option>`;
+  const optE = etapes.map(e=>`<option value="${e.nom}">${e.nom}</option>`).join('') + `<option value="__add__">+ Nouvelle étape...</option>`;
   document.getElementById('d-statut').innerHTML = optS;
   document.getElementById('d-etape').innerHTML = optE;
-  document.getElementById('filter-statut').innerHTML = '<option value="">Tous statuts</option>'+optS;
-  document.getElementById('filter-etape').innerHTML = '<option value="">Toutes étapes</option>'+optE;
+  document.getElementById('filter-statut').innerHTML = '<option value="">Tous statuts</option>'+statuts.map(s=>`<option>${s.nom}</option>`).join('');
+  document.getElementById('filter-etape').innerHTML = '<option value="">Toutes étapes</option>'+etapes.map(e=>`<option>${e.nom}</option>`).join('');
+}
+function handleStatutSelect(sel){
+  document.getElementById('d-statut-newbox').classList.toggle('hidden', sel.value!=='__add__');
+}
+function handleEtapeSelect(sel){
+  document.getElementById('d-etape-newbox').classList.toggle('hidden', sel.value!=='__add__');
+}
+async function confirmNewStatut(){
+  const nom = document.getElementById('d-statut-newval').value.trim();
+  if(!nom) return;
+  await sb.from('ministere_statuts').insert({workspace_id: wid(), nom, ordre: statuts.length});
+  await loadConfig();
+  document.getElementById('d-statut').value = nom;
+  document.getElementById('d-statut-newbox').classList.add('hidden');
+  document.getElementById('d-statut-newval').value = '';
+}
+async function confirmNewEtape(){
+  const nom = document.getElementById('d-etape-newval').value.trim();
+  if(!nom) return;
+  await sb.from('ministere_etapes').insert({workspace_id: wid(), nom, ordre: etapes.length});
+  await loadConfig();
+  document.getElementById('d-etape').value = nom;
+  document.getElementById('d-etape-newbox').classList.add('hidden');
+  document.getElementById('d-etape-newval').value = '';
+  renderDashboard();
 }
 
 /* ---------- DASHBOARD ---------- */
@@ -723,11 +761,21 @@ function openConfigModal(){
 }
 function renderConfigLists(){
   document.getElementById('cfg-statuts-list').innerHTML = statuts.map(s=>
-    `<div class="flex items-center justify-between p-1.5 rounded bg-gray-50"><span>${s.nom}</span><button class="text-red-500 text-xs" onclick="deleteStatut('${s.id}')">✕</button></div>`
+    `<div class="flex items-center gap-1"><input value="${s.nom}" onchange="renameStatut('${s.id}', this.value)" class="flex-1"><button class="text-red-500 text-xs px-1" onclick="deleteStatut('${s.id}')">✕</button></div>`
   ).join('') || '<p class="text-gray-400">Aucun statut.</p>';
   document.getElementById('cfg-etapes-list').innerHTML = etapes.map(e=>
-    `<div class="flex items-center justify-between p-1.5 rounded bg-gray-50"><span>${e.nom}</span><button class="text-red-500 text-xs" onclick="deleteEtape('${e.id}')">✕</button></div>`
+    `<div class="flex items-center gap-1"><input value="${e.nom}" onchange="renameEtape('${e.id}', this.value)" class="flex-1"><button class="text-red-500 text-xs px-1" onclick="deleteEtape('${e.id}')">✕</button></div>`
   ).join('') || '<p class="text-gray-400">Aucune étape.</p>';
+}
+async function renameStatut(id, nom){
+  if(!nom.trim()) return;
+  await sb.from('ministere_statuts').update({nom: nom.trim()}).eq('id', id);
+  await loadConfig();
+}
+async function renameEtape(id, nom){
+  if(!nom.trim()) return;
+  await sb.from('ministere_etapes').update({nom: nom.trim()}).eq('id', id);
+  await loadConfig(); renderDashboard();
 }
 async function addStatut(){
   const nom = document.getElementById('cfg-statut-new').value.trim();
@@ -750,20 +798,6 @@ async function addEtape(){
 async function deleteEtape(id){
   await sb.from('ministere_etapes').delete().eq('id', id);
   await loadConfig(); renderConfigLists(); renderDashboard();
-}
-async function quickAddStatut(){
-  const nom = prompt('Nom du nouveau statut :');
-  if(!nom) return;
-  await sb.from('ministere_statuts').insert({workspace_id: wid(), nom, ordre: statuts.length});
-  await loadConfig();
-  document.getElementById('d-statut').value = nom;
-}
-async function quickAddEtape(){
-  const nom = prompt("Nom de la nouvelle étape :");
-  if(!nom) return;
-  await sb.from('ministere_etapes').insert({workspace_id: wid(), nom, ordre: etapes.length});
-  await loadConfig();
-  document.getElementById('d-etape').value = nom;
 }
 
 /* ---------- EXPORT DISCIPLES ---------- */
@@ -837,14 +871,29 @@ function renderSeances(){
         <div><b>${s.date_seance}</b> — ${s.theme||''}</div>
         <div class="text-xs text-gray-500">${nbP}/${list.length} présents</div>
       </div>
+      ${s.exhortation?`<p class="text-xs text-gray-500 mt-1">Exhortation : ${s.exhortation}</p>`:''}
+      ${s.point_arret?`<p class="text-sm mt-1">📍 ${s.point_arret}</p>`:''}
       ${s.observations?`<p class="text-sm text-gray-600 mt-1">${s.observations}</p>`:''}
     </div>`;
   }).join('') || '<p class="text-gray-400">Aucune séance enregistrée.</p>';
 }
 function openSeanceModal(){
   document.getElementById('s-date').value = new Date().toISOString().slice(0,10);
-  document.getElementById('s-theme').value=''; document.getElementById('s-qse').value=''; document.getElementById('s-obs').value=''; document.getElementById('s-prep').value='';
+  document.getElementById('s-theme').value=''; document.getElementById('s-exhortation').value='';
+  document.getElementById('s-qse').value=''; document.getElementById('s-revelations').value='';
+  document.getElementById('s-obs').value=''; document.getElementById('s-point-arret').value=''; document.getElementById('s-prep').value='';
   document.getElementById('s-statut-theme').value = 'En cours';
+  document.getElementById('s-rubrique-setup').classList.add('hidden');
+  document.getElementById('s-rubrique-label-new').value='';
+  if(programme?.rubrique_label){
+    document.getElementById('s-rubrique-box').classList.remove('hidden');
+    document.getElementById('s-rubrique-add-btn').classList.add('hidden');
+    document.getElementById('s-rubrique-label').textContent = programme.rubrique_label;
+    document.getElementById('s-rubrique-valeur').value = '';
+  } else {
+    document.getElementById('s-rubrique-box').classList.add('hidden');
+    document.getElementById('s-rubrique-add-btn').classList.remove('hidden');
+  }
   currentTodoList = [];
   const last = seances[0];
   if(last?.preparation_suivante) currentTodoList = last.preparation_suivante.split('\n').filter(Boolean).map(t=>({text:t, done:false}));
@@ -853,6 +902,22 @@ function openSeanceModal(){
     `<label class="flex items-center gap-2"><input type="checkbox" class="w-auto s-present" data-id="${d.id}" checked> ${d.prenom} ${d.nom}</label>`
   ).join('') || "<p class=\"text-gray-400\">Ajoutez d'abord des disciples.</p>";
   openModal('modal-seance');
+}
+function toggleRubriqueSetup(){
+  document.getElementById('s-rubrique-setup').classList.toggle('hidden');
+}
+async function saveRubriqueLabel(){
+  const label = document.getElementById('s-rubrique-label-new').value.trim();
+  if(!label) return;
+  const payload = { workspace_id: wid(), nom: accountLabel(), jour: programme?.jour||'', heure: programme?.heure||'', lieu: programme?.lieu||'', rubrique_label: label };
+  if(programme?.id) await sb.from('ministere_programme').update({rubrique_label: label}).eq('id', programme.id);
+  else await sb.from('ministere_programme').insert(payload);
+  await loadProgramme();
+  document.getElementById('s-rubrique-box').classList.remove('hidden');
+  document.getElementById('s-rubrique-add-btn').classList.add('hidden');
+  document.getElementById('s-rubrique-setup').classList.add('hidden');
+  document.getElementById('s-rubrique-label').textContent = label;
+  document.getElementById('s-rubrique-valeur').value = '';
 }
 function renderTodoList(){
   document.getElementById('s-todo-list').innerHTML = currentTodoList.map((t,i)=>
@@ -868,8 +933,12 @@ function addTodoItem(){
 }
 async function saveSeance(){
   const payload = { workspace_id: wid(), date_seance: document.getElementById('s-date').value, theme: document.getElementById('s-theme').value,
+    exhortation: document.getElementById('s-exhortation').value,
     statut_theme: document.getElementById('s-statut-theme').value,
-    questions_saint_esprit: document.getElementById('s-qse').value, observations: document.getElementById('s-obs').value,
+    point_arret: document.getElementById('s-point-arret').value,
+    questions_saint_esprit: document.getElementById('s-qse').value, revelations: document.getElementById('s-revelations').value,
+    observations: document.getElementById('s-obs').value,
+    rubrique_valeur: programme?.rubrique_label ? document.getElementById('s-rubrique-valeur').value : null,
     todo_list: currentTodoList, preparation_suivante: document.getElementById('s-prep').value };
   const {data} = await sb.from('ministere_seances').insert(payload).select();
   const seanceId = data[0].id;
