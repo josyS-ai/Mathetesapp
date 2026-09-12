@@ -90,11 +90,11 @@
     <div class="grid lg:grid-cols-3 gap-4 mb-6">
       <div class="card p-4 lg:col-span-2 overflow-x-auto">
         <div class="flex justify-between items-center mb-3">
-          <h3 class="font-display font-semibold" style="color:var(--navy)">Dernières séances & présences</h3>
+          <h3 class="font-display font-semibold" style="color:var(--navy)">Suivi des séances & des présences</h3>
           <button class="text-xs btn-gold" onclick="showTab('seances');openSeanceModal()">+ Nouvelle séance</button>
         </div>
         <table class="w-full text-left text-xs">
-          <thead><tr class="border-b text-gray-400 uppercase"><th class="pb-2">Date</th><th>Thème</th><th>Présents</th></tr></thead>
+          <thead><tr class="border-b text-gray-400 uppercase"><th class="pb-2">Date</th><th>Thème</th><th>N° séance</th><th>Statut</th><th>Présents</th></tr></thead>
           <tbody id="last-seances-table"></tbody>
         </table>
       </div>
@@ -268,6 +268,10 @@
     <div class="grid md:grid-cols-2 gap-2 mb-3">
       <input id="s-date" type="date">
       <input id="s-theme" placeholder="Thème / enseignement du jour">
+    </div>
+    <div class="mb-3">
+      <label class="text-xs text-gray-500">Statut du thème</label>
+      <select id="s-statut-theme"><option>En cours</option><option>Complété</option></select>
     </div>
     <h4 class="text-sm font-semibold mb-1" style="color:var(--navy)">Présences</h4>
     <div id="s-presence-list" class="grid md:grid-cols-2 gap-1 mb-3 max-h-40 overflow-y-auto text-sm"></div>
@@ -456,13 +460,26 @@ function renderDashboard(){
     <span class="badge" style="background:var(--gold-light);color:#7A5B14">Dans ${x.days} j.</span></div>`
   ).join('') : '<p class="text-gray-400">Aucun anniversaire dans les 60 prochains jours.</p>';
 
-  // dernières séances & présences (tableau)
-  const last5 = [...seances].sort((a,b)=> new Date(b.date_seance)-new Date(a.date_seance)).slice(0,5);
+  // suivi des séances & présences (tableau) — n° de séance sur le thème + statut
+  const byThemeCount = {};
+  const seancesChrono = [...seances].sort((a,b)=> new Date(a.date_seance)-new Date(b.date_seance));
+  seancesChrono.forEach(s=>{
+    const key = (s.theme||'').trim().toLowerCase();
+    byThemeCount[key] = (byThemeCount[key]||0) + 1;
+    s._themeIndex = byThemeCount[key];
+  });
+  const last5 = [...seancesChrono].reverse().slice(0,5);
   document.getElementById('last-seances-table').innerHTML = last5.map(s=>{
     const list = presences.filter(p=>p.seance_id===s.id);
     const nbP = list.filter(p=>p.present).length;
-    return `<tr class="border-b"><td class="py-2">${s.date_seance}</td><td>${s.theme||'—'}</td><td>${nbP}/${list.length}</td></tr>`;
-  }).join('') || `<tr><td colspan="3" class="py-2 text-gray-400">Aucune séance enregistrée.</td></tr>`;
+    const key = (s.theme||'').trim().toLowerCase();
+    const total = byThemeCount[key]||1;
+    const statut = s.statut_theme || 'En cours';
+    return `<tr class="border-b"><td class="py-2">${s.date_seance}</td><td>${s.theme||'—'}</td>
+      <td>${key ? s._themeIndex+'/'+total : '—'}</td>
+      <td><span class="badge" style="background:${statut==='Complété'?'#DCEEE1':'#EFE3C8'};color:${statut==='Complété'?'var(--ok)':'#7A5B14'}">${statut}</span></td>
+      <td>${nbP}/${list.length}</td></tr>`;
+  }).join('') || `<tr><td colspan="5" class="py-2 text-gray-400">Aucune séance enregistrée.</td></tr>`;
 
   // parcours
   const etapes = ['Accueil','Fondations','Baptême','Service'];
@@ -714,6 +731,7 @@ function renderSeances(){
 function openSeanceModal(){
   document.getElementById('s-date').value = new Date().toISOString().slice(0,10);
   document.getElementById('s-theme').value=''; document.getElementById('s-qse').value=''; document.getElementById('s-obs').value=''; document.getElementById('s-prep').value='';
+  document.getElementById('s-statut-theme').value = 'En cours';
   currentTodoList = [];
   const last = seances[0];
   if(last?.preparation_suivante) currentTodoList = last.preparation_suivante.split('\n').filter(Boolean).map(t=>({text:t, done:false}));
@@ -737,6 +755,7 @@ function addTodoItem(){
 }
 async function saveSeance(){
   const payload = { workspace_id: wid(), date_seance: document.getElementById('s-date').value, theme: document.getElementById('s-theme').value,
+    statut_theme: document.getElementById('s-statut-theme').value,
     questions_saint_esprit: document.getElementById('s-qse').value, observations: document.getElementById('s-obs').value,
     todo_list: currentTodoList, preparation_suivante: document.getElementById('s-prep').value };
   const {data} = await sb.from('ministere_seances').insert(payload).select();
