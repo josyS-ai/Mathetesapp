@@ -14,6 +14,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -29,6 +30,7 @@
   .navbtn{transition:.15s;} .navbtn.active{background:var(--navy);color:#fff;}
   .acct-btn{transition:.15s;border:2px solid transparent;}
   .acct-btn.active-adulte{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .periode-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);}
   .acct-btn.active-jeune{background:var(--jeune);color:#fff;border-color:var(--jeune);}
   .acct-btn.active-enfant{background:var(--enfant);color:#fff;border-color:var(--enfant);}
   .card{background:#fff;border:1px solid var(--line);border-radius:14px;}
@@ -164,6 +166,19 @@
 
   <!-- ============ FINANCES ============ -->
   <section id="tab-finances" class="tab-content">
+    <div class="flex justify-between items-center flex-wrap gap-2 mb-4">
+      <div>
+        <h2 class="font-display font-bold text-xl" style="color:var(--navy)">Trésorerie & Bilans Financiers</h2>
+        <p class="text-xs text-gray-500">Rapports d'activité mensuels, annuels et ventilation par catégorie.</p>
+      </div>
+      <div class="flex gap-2 flex-wrap">
+        <button class="btn-outline text-sm" onclick="exportBilanPDF()">📄 Exporter Bilan (PDF)</button>
+        <button class="btn-outline text-sm" onclick="exportFinancesCSV()">⬇ Exporter Excel (CSV)</button>
+        <button class="text-sm px-4 py-2 rounded-xl font-semibold text-white" style="background:var(--ok)" onclick="quickFinType('entree')">↙ Entrée</button>
+        <button class="text-sm px-4 py-2 rounded-xl font-semibold text-white" style="background:#B4372A" onclick="quickFinType('sortie')">↗ Dépense</button>
+      </div>
+    </div>
+
     <div class="card p-4 mb-4">
       <h3 class="font-display font-semibold mb-3" style="color:var(--navy)">Nouveau mouvement</h3>
       <div class="grid md:grid-cols-3 gap-2">
@@ -181,15 +196,43 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-3 gap-3 mb-4" id="fin-kpi"></div>
-
-    <div class="card p-4 overflow-x-auto">
-      <div class="flex justify-between mb-2">
-        <h3 class="font-display font-semibold" style="color:var(--navy)">Historique</h3>
-        <button class="text-sm underline" onclick="exportFinancesCSV()">Exporter CSV</button>
+    <div class="card p-3 mb-4">
+      <p class="text-xs text-gray-500 mb-2">Sélectionner la période du bilan :</p>
+      <div class="flex gap-2 flex-wrap" id="periode-selector">
+        <button class="btn-outline text-xs periode-btn" data-p="today" onclick="setPeriode('today')">Aujourd'hui</button>
+        <button class="btn-outline text-xs periode-btn" data-p="month" onclick="setPeriode('month')">Ce mois-ci</button>
+        <button class="btn-outline text-xs periode-btn" data-p="lastmonth" onclick="setPeriode('lastmonth')">Le mois dernier</button>
+        <button class="btn-outline text-xs periode-btn" data-p="year" onclick="setPeriode('year')">Cette année</button>
+        <button class="btn-outline text-xs periode-btn" data-p="custom" onclick="setPeriode('custom')">Période Personnalisée</button>
       </div>
-      <table class="w-full text-sm">
-        <thead><tr class="text-left text-gray-500 border-b"><th class="py-1">Date</th><th>Type</th><th>Nom</th><th>Catégorie</th><th>Montant</th><th>Détail</th><th></th></tr></thead>
+      <div id="periode-custom-box" class="hidden flex gap-2 mt-2">
+        <input id="periode-debut" type="date"> <span class="self-center text-xs">à</span> <input id="periode-fin" type="date">
+        <button class="btn-outline text-xs" onclick="renderFinances()">Appliquer</button>
+      </div>
+    </div>
+
+    <div id="bilan-report" class="card p-4">
+      <div class="flex justify-between items-start mb-3">
+        <div>
+          <h3 class="font-display font-semibold" style="color:var(--navy)">Rapport & Bilan de Trésorerie</h3>
+          <p class="text-xs text-gray-500">Ministère de la Parole — Discipulat</p>
+        </div>
+        <div class="text-right text-xs text-gray-500">
+          <div>Période : <b id="periode-label">Ce mois-ci</b></div>
+          <div>Généré le : <span id="periode-generated"></span></div>
+        </div>
+      </div>
+      <div class="grid grid-cols-3 gap-3 mb-4" id="fin-kpi"></div>
+
+      <h4 class="text-sm font-semibold mb-2" style="color:var(--navy)">Ventilation par catégorie (entrées & dépenses)</h4>
+      <table class="w-full text-sm mb-5">
+        <thead><tr class="text-left text-gray-500 border-b"><th class="py-1">Catégorie</th><th>Type</th><th>Montant Total</th><th>% du Total</th></tr></thead>
+        <tbody id="fin-ventilation"></tbody>
+      </table>
+
+      <h4 class="text-sm font-semibold mb-2" style="color:var(--navy)">Détail des opérations de la période</h4>
+      <table class="w-full text-sm overflow-x-auto">
+        <thead><tr class="text-left text-gray-500 border-b"><th class="py-1">Date</th><th>Type</th><th>Personne / Bénéficiaire</th><th>Catégorie</th><th>Montant</th><th></th></tr></thead>
         <tbody id="fin-table"></tbody>
       </table>
     </div>
@@ -947,15 +990,20 @@ async function saveSeance(){
   closeModal('modal-seance'); await Promise.all([loadSeances(), loadPresences()]); renderSeances(); renderDashboard();
 }
 
-/* ---------- FINANCES ---------- */
+/* ---------- FINANCES / TRESORERIE & BILANS ---------- */
 const catsEntree = ['Offrande','Dîme','Don spécial','Autre'];
 const catsSortie = ['Achat supports','Aide sociale','Transport','Autre'];
+let currentPeriode = 'month';
 function onFinTypeChange(){
   const t = document.getElementById('fin-type').value;
   const sel = document.getElementById('fin-cat');
   sel.innerHTML = (t==='entree'?catsEntree:catsSortie).map(c=>`<option>${c}</option>`).join('');
 }
 onFinTypeChange();
+function quickFinType(t){
+  document.getElementById('fin-type').value = t; onFinTypeChange();
+  document.getElementById('fin-nom').scrollIntoView({behavior:'smooth', block:'center'});
+}
 async function addTransaction(){
   const payload = { workspace_id: wid(), type_mvt: document.getElementById('fin-type').value,
     nom_personne: document.getElementById('fin-nom').value, categorie: document.getElementById('fin-cat').value,
@@ -966,20 +1014,65 @@ async function addTransaction(){
   ['fin-nom','fin-montant','fin-usage','fin-justif'].forEach(i=>document.getElementById(i).value='');
   await loadTransactions(); renderFinances(); renderDashboard();
 }
+function setPeriode(p){
+  currentPeriode = p;
+  document.querySelectorAll('.periode-btn').forEach(b=>b.classList.toggle('active', b.dataset.p===p));
+  document.getElementById('periode-custom-box').classList.toggle('hidden', p!=='custom');
+  renderFinances();
+}
+function periodeRange(){
+  const now = new Date();
+  let debut, fin;
+  if(currentPeriode==='today'){ debut = new Date(now.getFullYear(),now.getMonth(),now.getDate()); fin = new Date(now.getFullYear(),now.getMonth(),now.getDate(),23,59,59); }
+  else if(currentPeriode==='month'){ debut = new Date(now.getFullYear(),now.getMonth(),1); fin = new Date(now.getFullYear(),now.getMonth()+1,0,23,59,59); }
+  else if(currentPeriode==='lastmonth'){ debut = new Date(now.getFullYear(),now.getMonth()-1,1); fin = new Date(now.getFullYear(),now.getMonth(),0,23,59,59); }
+  else if(currentPeriode==='year'){ debut = new Date(now.getFullYear(),0,1); fin = new Date(now.getFullYear(),11,31,23,59,59); }
+  else if(currentPeriode==='custom'){
+    const dv = document.getElementById('periode-debut').value, fv = document.getElementById('periode-fin').value;
+    debut = dv ? new Date(dv) : new Date(2000,0,1);
+    fin = fv ? new Date(fv+'T23:59:59') : now;
+  }
+  return {debut, fin};
+}
+const periodeLabels = {today:"Aujourd'hui", month:'Ce mois-ci', lastmonth:'Le mois dernier', year:'Cette année', custom:'Période personnalisée'};
 function renderFinances(){
-  const entrees = transactions.filter(t=>t.type_mvt==='entree').reduce((s,t)=>s+Number(t.montant),0);
-  const sorties = transactions.filter(t=>t.type_mvt==='sortie').reduce((s,t)=>s+Number(t.montant),0);
-  document.getElementById('fin-kpi').innerHTML = `${kpi('Entrées', entrees.toLocaleString('fr-FR')+' F')}${kpi('Sorties', sorties.toLocaleString('fr-FR')+' F')}${kpi('Solde', (entrees-sorties).toLocaleString('fr-FR')+' F')}`;
-  document.getElementById('fin-table').innerHTML = transactions.map(t=>`
+  document.querySelectorAll('.periode-btn').forEach(b=>b.classList.toggle('active', b.dataset.p===currentPeriode));
+  const {debut, fin} = periodeRange();
+  const filtered = transactions.filter(t=>{ const d = new Date(t.date_mvt); return d>=debut && d<=fin; });
+
+  document.getElementById('periode-label').textContent = periodeLabels[currentPeriode];
+  document.getElementById('periode-generated').textContent = new Date().toLocaleDateString('fr-FR');
+
+  const entrees = filtered.filter(t=>t.type_mvt==='entree').reduce((s,t)=>s+Number(t.montant),0);
+  const sorties = filtered.filter(t=>t.type_mvt==='sortie').reduce((s,t)=>s+Number(t.montant),0);
+  document.getElementById('fin-kpi').innerHTML =
+    `<div class="card p-3" style="background:#EAF6EE"><div class="text-xs text-gray-500">TOTAL ENTRÉES (PÉRIODE)</div><div class="text-xl font-bold" style="color:var(--ok)">${entrees.toLocaleString('fr-FR')} F</div></div>
+     <div class="card p-3" style="background:#FBEAEA"><div class="text-xs text-gray-500">TOTAL DÉPENSES (PÉRIODE)</div><div class="text-xl font-bold text-red-600">${sorties.toLocaleString('fr-FR')} F</div></div>
+     <div class="card p-3" style="background:#EAF0FB"><div class="text-xs text-gray-500">SOLDE DE LA PÉRIODE</div><div class="text-xl font-bold" style="color:var(--navy)">${(entrees-sorties).toLocaleString('fr-FR')} F</div></div>`;
+
+  // ventilation par catégorie
+  const cats = {};
+  filtered.forEach(t=>{
+    const key = (t.categorie||'Autre')+'|'+t.type_mvt;
+    cats[key] = (cats[key]||0) + Number(t.montant);
+  });
+  const totalAbs = Object.values(cats).reduce((a,b)=>a+b,0) || 1;
+  document.getElementById('fin-ventilation').innerHTML = Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([key,val])=>{
+    const [cat,type] = key.split('|');
+    return `<tr class="border-b"><td class="py-1">${cat}</td><td>${type==='entree'?'Entrée':'Dépense'}</td>
+      <td class="${type==='entree'?'text-green-700':'text-red-600'}">${val.toLocaleString('fr-FR')} F</td><td>${Math.round(val/totalAbs*100)}%</td></tr>`;
+  }).join('') || `<tr><td colspan="4" class="py-2 text-gray-400">Aucun mouvement sur la période.</td></tr>`;
+
+  // détail des opérations (période)
+  document.getElementById('fin-table').innerHTML = [...filtered].sort((a,b)=>new Date(b.date_mvt)-new Date(a.date_mvt)).map(t=>`
     <tr class="border-b">
       <td class="py-1">${t.date_mvt}</td>
       <td>${t.type_mvt==='entree'?'Entrée':'Sortie'}</td>
       <td>${t.nom_personne||''}</td>
       <td>${t.categorie||''}</td>
       <td class="${t.type_mvt==='entree'?'text-green-700':'text-red-600'}">${Number(t.montant).toLocaleString('fr-FR')} F</td>
-      <td class="text-xs text-gray-500">${t.usage_sortie||t.justificatif||''}</td>
       <td><button class="text-xs text-red-500" onclick="deleteTransaction('${t.id}')">✕</button></td>
-    </tr>`).join('');
+    </tr>`).join('') || `<tr><td colspan="6" class="py-2 text-gray-400">Aucun mouvement sur la période.</td></tr>`;
 }
 async function deleteTransaction(id){
   if(!confirm('Supprimer ce mouvement ?')) return;
@@ -991,6 +1084,10 @@ function exportFinancesCSV(){
   transactions.forEach(t=>{ csv += `${t.date_mvt},${t.type_mvt},"${t.nom_personne||''}",${t.categorie||''},${t.montant},"${t.usage_sortie||t.justificatif||''}"\n`; });
   const blob = new Blob([csv], {type:'text/csv'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `finances_${account}.csv`; a.click();
+}
+function exportBilanPDF(){
+  const el = document.getElementById('bilan-report');
+  html2pdf().set({margin:10, filename:`bilan_${account}_${currentPeriode}.pdf`, jsPDF:{format:'a4'}}).from(el).save();
 }
 
 /* ---------- MEMO ---------- */
