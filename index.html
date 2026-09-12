@@ -130,14 +130,10 @@
   <section id="tab-disciples" class="tab-content">
     <div class="flex flex-wrap gap-2 items-center mb-4">
       <input id="search-disciple" placeholder="Rechercher un nom..." class="max-w-xs" oninput="renderDisciples()">
-      <select id="filter-statut" onchange="renderDisciples()">
-        <option value="">Tous statuts</option>
-        <option>Actif</option><option>En pause</option><option>Parti</option>
-      </select>
-      <select id="filter-etape" onchange="renderDisciples()">
-        <option value="">Toutes étapes</option>
-        <option>Accueil</option><option>Fondations</option><option>Baptême</option><option>Service</option>
-      </select>
+      <select id="filter-statut" onchange="renderDisciples()"><option value="">Tous statuts</option></select>
+      <select id="filter-etape" onchange="renderDisciples()"><option value="">Toutes étapes</option></select>
+      <button class="btn-outline text-sm" onclick="openConfigModal()">⚙️ Statuts & étapes</button>
+      <button class="btn-outline text-sm" onclick="exportDisciplesCSV()">⬇ Exporter la liste</button>
       <button class="btn-gold ml-auto" onclick="openDiscipleModal()">+ Nouveau disciple</button>
     </div>
     <div id="disciples-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
@@ -224,10 +220,9 @@
       <div><label class="text-xs text-gray-500">Date de naissance</label><input id="d-naissance" type="date"></div>
       <div><label class="text-xs text-gray-500">Année de conversion</label><input id="d-conversion" type="number" placeholder="ex: 2021"></div>
       <div><label class="text-xs text-gray-500">Date d'arrivée</label><input id="d-arrivee" type="date"></div>
-      <select id="d-statut"><option>Actif</option><option>En pause</option><option>Parti</option></select>
-      <select id="d-etape"><option>Accueil</option><option>Fondations</option><option>Baptême</option><option>Service</option></select>
-      <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="d-baptise" class="w-auto"> Baptisé</label>
-      <input id="d-dons" placeholder="Dons spirituels identifiés" class="md:col-span-2">
+      <div class="flex gap-1"><select id="d-statut" class="flex-1"></select><button type="button" class="btn-outline px-2" title="Ajouter un statut" onclick="quickAddStatut()">+</button></div>
+      <div class="flex gap-1"><select id="d-etape" class="flex-1"></select><button type="button" class="btn-outline px-2" title="Ajouter une étape" onclick="quickAddEtape()">+</button></div>
+      <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="d-baptise" class="w-auto"> Baptisé(e) d'eau ?</label>
       <input id="d-tel" placeholder="Téléphone">
     </div>
     <div id="d-tuteur-box" class="hidden grid md:grid-cols-3 gap-2 mb-3 p-2 rounded-lg" style="background:var(--enfant-light)">
@@ -235,7 +230,9 @@
       <input id="d-tuteur-tel" placeholder="Téléphone du tuteur">
       <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="d-tuteur-auth" class="w-auto"> Autorisation parentale</label>
     </div>
-    <textarea id="d-besoins" rows="2" placeholder="Besoins spirituels (résumé actuel)" class="mb-3"></textarea>
+    <textarea id="d-besoins" rows="2" placeholder="Besoins spirituels (résumé actuel)" class="mb-2"></textarea>
+    <textarea id="d-parole" rows="2" placeholder="Parole de connaissance / Réponses du Saint-Esprit" class="mb-2"></textarea>
+    <input id="d-dons" placeholder="Dons spirituels identifiés" class="mb-3">
 
     <div class="flex justify-between items-center">
       <button class="btn-navy" onclick="saveDisciple()">Enregistrer</button>
@@ -285,6 +282,29 @@
   </div>
 </div>
 
+<!-- MODAL CONFIG STATUTS/ETAPES -->
+<div id="modal-config" class="fixed inset-0 modal-bg hidden items-center justify-center p-4 z-50">
+  <div class="card w-full max-w-lg p-5">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="font-display font-bold text-lg" style="color:var(--navy)">Statuts & étapes du parcours</h3>
+      <button onclick="closeModal('modal-config')">✕</button>
+    </div>
+    <p class="text-xs text-gray-500 mb-3">Personnalisez selon le compte actif (<span id="cfg-account-label"></span>). Supprimer un statut/une étape n'affecte pas les fiches déjà enregistrées.</p>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div>
+        <h4 class="text-sm font-semibold mb-2" style="color:var(--navy)">Statuts</h4>
+        <div id="cfg-statuts-list" class="space-y-1 mb-2 text-sm"></div>
+        <div class="flex gap-1"><input id="cfg-statut-new" placeholder="Nouveau statut"><button class="btn-outline" onclick="addStatut()">+</button></div>
+      </div>
+      <div>
+        <h4 class="text-sm font-semibold mb-2" style="color:var(--navy)">Étapes du parcours</h4>
+        <div id="cfg-etapes-list" class="space-y-1 mb-2 text-sm"></div>
+        <div class="flex gap-1"><input id="cfg-etape-new" placeholder="Nouvelle étape"><button class="btn-outline" onclick="addEtape()">+</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL SUIVI -->
 <div id="modal-suivi" class="fixed inset-0 modal-bg hidden items-center justify-center p-4 z-50">
   <div class="card w-full max-w-md p-5">
@@ -329,6 +349,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let account = localStorage.getItem('ministere_account') || 'adultes';
 let disciples = [], seances = [], presences = [], transactions = [], programme = null, journalCache = {};
 let suivis = [], prieres = [];
+let statuts = [], etapes = [];
 let currentTodoList = [];
 
 function wid(){ return 'ministere_'+account; }
@@ -355,7 +376,7 @@ function closeModal(id){ document.getElementById(id).classList.add('hidden'); do
 function openModal(id){ document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
 
 async function loadAll(){
-  await Promise.all([loadDisciples(), loadSeances(), loadPresences(), loadTransactions(), loadProgramme(), loadMemo(), loadSuivis(), loadPrieres()]);
+  await Promise.all([loadDisciples(), loadSeances(), loadPresences(), loadTransactions(), loadProgramme(), loadMemo(), loadSuivis(), loadPrieres(), loadConfig()]);
   renderDashboard(); renderDisciples(); renderSeances(); renderFinances(); renderProgramme();
 }
 
@@ -390,6 +411,33 @@ async function loadSuivis(){
 async function loadPrieres(){
   const {data} = await sb.from('ministere_prieres').select('*').eq('workspace_id', wid()).order('created_at',{ascending:false});
   prieres = data || [];
+}
+const DEFAULT_STATUTS = ['Actif','En pause','Parti'];
+const DEFAULT_ETAPES = ['Accueil','Fondations','Baptême','Service'];
+async function loadConfig(){
+  let {data:st} = await sb.from('ministere_statuts').select('*').eq('workspace_id', wid()).order('ordre');
+  if(!st || !st.length){
+    const rows = DEFAULT_STATUTS.map((nom,i)=>({workspace_id: wid(), nom, ordre:i}));
+    const {data} = await sb.from('ministere_statuts').insert(rows).select();
+    st = data;
+  }
+  statuts = st || [];
+  let {data:et} = await sb.from('ministere_etapes').select('*').eq('workspace_id', wid()).order('ordre');
+  if(!et || !et.length){
+    const rows = DEFAULT_ETAPES.map((nom,i)=>({workspace_id: wid(), nom, ordre:i}));
+    const {data} = await sb.from('ministere_etapes').insert(rows).select();
+    et = data;
+  }
+  etapes = et || [];
+  fillStatutEtapeSelects();
+}
+function fillStatutEtapeSelects(){
+  const optS = statuts.map(s=>`<option>${s.nom}</option>`).join('');
+  const optE = etapes.map(e=>`<option>${e.nom}</option>`).join('');
+  document.getElementById('d-statut').innerHTML = optS;
+  document.getElementById('d-etape').innerHTML = optE;
+  document.getElementById('filter-statut').innerHTML = '<option value="">Tous statuts</option>'+optS;
+  document.getElementById('filter-etape').innerHTML = '<option value="">Toutes étapes</option>'+optE;
 }
 
 /* ---------- DASHBOARD ---------- */
@@ -482,9 +530,9 @@ function renderDashboard(){
   }).join('') || `<tr><td colspan="5" class="py-2 text-gray-400">Aucune séance enregistrée.</td></tr>`;
 
   // parcours
-  const etapes = ['Accueil','Fondations','Baptême','Service'];
-  const max = Math.max(1, ...etapes.map(e=>disciples.filter(d=>d.etape_parcours===e).length));
-  document.getElementById('parcours-box').innerHTML = etapes.map(e=>{
+  const etapeNoms = etapes.map(e=>e.nom);
+  const max = Math.max(1, ...etapeNoms.map(e=>disciples.filter(d=>d.etape_parcours===e).length));
+  document.getElementById('parcours-box').innerHTML = etapeNoms.map(e=>{
     const n = disciples.filter(d=>d.etape_parcours===e).length;
     return `<div><div class="flex justify-between text-xs mb-1"><span>${e}</span><span>${n}</span></div>
     <div class="h-2 rounded-full bg-gray-100"><div class="h-2 rounded-full" style="width:${(n/max)*100}%;background:var(--gold)"></div></div></div>`;
@@ -616,9 +664,10 @@ let editingDiscipleId = null;
 function openDiscipleModal(id){
   editingDiscipleId = id || null;
   const box = document.getElementById('d-journal-section'); const delBtn = document.getElementById('d-delete-btn');
-  ['d-nom','d-prenom','d-naissance','d-conversion','d-arrivee','d-dons','d-tel','d-tuteur-nom','d-tuteur-tel','d-besoins'].forEach(i=>document.getElementById(i).value='');
+  ['d-nom','d-prenom','d-naissance','d-conversion','d-arrivee','d-dons','d-tel','d-tuteur-nom','d-tuteur-tel','d-besoins','d-parole'].forEach(i=>document.getElementById(i).value='');
   document.getElementById('d-baptise').checked = false; document.getElementById('d-tuteur-auth').checked = false;
-  document.getElementById('d-statut').value='Actif'; document.getElementById('d-etape').value='Accueil';
+  if(statuts[0]) document.getElementById('d-statut').value = statuts[0].nom;
+  if(etapes[0]) document.getElementById('d-etape').value = etapes[0].nom;
   document.getElementById('d-tuteur-box').classList.toggle('hidden', !isMinor());
 
   if(id){
@@ -627,11 +676,13 @@ function openDiscipleModal(id){
     document.getElementById('d-nom').value = d.nom||''; document.getElementById('d-prenom').value = d.prenom||'';
     document.getElementById('d-naissance').value = d.date_naissance||''; document.getElementById('d-conversion').value = d.annee_conversion||'';
     document.getElementById('d-arrivee').value = d.date_arrivee||''; document.getElementById('d-baptise').checked = !!d.baptise;
-    document.getElementById('d-statut').value = d.statut||'Actif'; document.getElementById('d-etape').value = d.etape_parcours||'Accueil';
+    if(d.statut) document.getElementById('d-statut').value = d.statut;
+    if(d.etape_parcours) document.getElementById('d-etape').value = d.etape_parcours;
     document.getElementById('d-dons').value = d.dons_identifies||''; document.getElementById('d-tel').value = d.telephone||'';
     document.getElementById('d-tuteur-nom').value = d.tuteur_nom||''; document.getElementById('d-tuteur-tel').value = d.tuteur_telephone||'';
     document.getElementById('d-tuteur-auth').checked = !!d.tuteur_autorisation;
     document.getElementById('d-besoins').value = d.besoins_spirituels||'';
+    document.getElementById('d-parole').value = d.parole_connaissance||'';
     box.classList.remove('hidden'); delBtn.classList.remove('hidden');
     loadJournalFor(id); renderAssiduite(id);
   } else {
@@ -657,10 +708,72 @@ async function saveDisciple(){
     tuteur_telephone: document.getElementById('d-tuteur-tel').value,
     tuteur_autorisation: document.getElementById('d-tuteur-auth').checked,
     besoins_spirituels: document.getElementById('d-besoins').value,
+    parole_connaissance: document.getElementById('d-parole').value,
   };
   if(id){ await sb.from('ministere_disciples').update(payload).eq('id', id); }
   else { await sb.from('ministere_disciples').insert(payload); }
   closeModal('modal-disciple'); await loadDisciples(); renderDisciples(); renderDashboard();
+}
+
+/* ---------- CONFIG : statuts & étapes ---------- */
+function openConfigModal(){
+  document.getElementById('cfg-account-label').textContent = account==='adultes'?'Adultes':account==='jeunes'?'Jeunes':'Enfants';
+  renderConfigLists();
+  openModal('modal-config');
+}
+function renderConfigLists(){
+  document.getElementById('cfg-statuts-list').innerHTML = statuts.map(s=>
+    `<div class="flex items-center justify-between p-1.5 rounded bg-gray-50"><span>${s.nom}</span><button class="text-red-500 text-xs" onclick="deleteStatut('${s.id}')">✕</button></div>`
+  ).join('') || '<p class="text-gray-400">Aucun statut.</p>';
+  document.getElementById('cfg-etapes-list').innerHTML = etapes.map(e=>
+    `<div class="flex items-center justify-between p-1.5 rounded bg-gray-50"><span>${e.nom}</span><button class="text-red-500 text-xs" onclick="deleteEtape('${e.id}')">✕</button></div>`
+  ).join('') || '<p class="text-gray-400">Aucune étape.</p>';
+}
+async function addStatut(){
+  const nom = document.getElementById('cfg-statut-new').value.trim();
+  if(!nom) return;
+  await sb.from('ministere_statuts').insert({workspace_id: wid(), nom, ordre: statuts.length});
+  document.getElementById('cfg-statut-new').value='';
+  await loadConfig(); renderConfigLists();
+}
+async function deleteStatut(id){
+  await sb.from('ministere_statuts').delete().eq('id', id);
+  await loadConfig(); renderConfigLists();
+}
+async function addEtape(){
+  const nom = document.getElementById('cfg-etape-new').value.trim();
+  if(!nom) return;
+  await sb.from('ministere_etapes').insert({workspace_id: wid(), nom, ordre: etapes.length});
+  document.getElementById('cfg-etape-new').value='';
+  await loadConfig(); renderConfigLists(); renderDashboard();
+}
+async function deleteEtape(id){
+  await sb.from('ministere_etapes').delete().eq('id', id);
+  await loadConfig(); renderConfigLists(); renderDashboard();
+}
+async function quickAddStatut(){
+  const nom = prompt('Nom du nouveau statut :');
+  if(!nom) return;
+  await sb.from('ministere_statuts').insert({workspace_id: wid(), nom, ordre: statuts.length});
+  await loadConfig();
+  document.getElementById('d-statut').value = nom;
+}
+async function quickAddEtape(){
+  const nom = prompt("Nom de la nouvelle étape :");
+  if(!nom) return;
+  await sb.from('ministere_etapes').insert({workspace_id: wid(), nom, ordre: etapes.length});
+  await loadConfig();
+  document.getElementById('d-etape').value = nom;
+}
+
+/* ---------- EXPORT DISCIPLES ---------- */
+function exportDisciplesCSV(){
+  let csv = 'Nom,Prénom,Statut,Étape,Baptisé(e) d\u2019eau,Date de naissance,Année de conversion,Date d\u2019arrivée,Téléphone,Besoins spirituels,Parole de connaissance / Réponses du Saint-Esprit,Dons identifiés\n';
+  disciples.forEach(d=>{
+    csv += `"${d.nom||''}","${d.prenom||''}","${d.statut||''}","${d.etape_parcours||''}",${d.baptise?'Oui':'Non'},${d.date_naissance||''},${d.annee_conversion||''},${d.date_arrivee||''},"${d.telephone||''}","${(d.besoins_spirituels||'').replace(/"/g,"'")}","${(d.parole_connaissance||'').replace(/"/g,"'")}","${(d.dons_identifies||'').replace(/"/g,"'")}"\n`;
+  });
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `disciples_${account}.csv`; a.click();
 }
 async function deleteDisciple(){
   const id = document.getElementById('d-id').value;
