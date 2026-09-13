@@ -69,7 +69,7 @@
     <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border" data-tab="dashboard" onclick="showTab('dashboard')">Tableau de bord</button>
     <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border" data-tab="disciples" onclick="showTab('disciples')">Disciples</button>
     <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border" data-tab="seances" onclick="showTab('seances')">Séances</button>
-    <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border" data-tab="finances" onclick="showTab('finances')">Finances</button>
+    <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border" data-tab="finances" onclick="showTab('finances')">Trésorerie & Bilans</button>
     <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border" data-tab="memo" onclick="showTab('memo')">Mémo du formateur</button>
   </nav>
 
@@ -432,8 +432,40 @@ function closeModal(id){ document.getElementById(id).classList.add('hidden'); do
 function openModal(id){ document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
 
 async function loadAll(){
-  await Promise.all([loadDisciples(), loadSeances(), loadPresences(), loadTransactions(), loadProgramme(), loadMemo(), loadSuivis(), loadPrieres(), loadConfig()]);
-  renderDashboard(); renderDisciples(); renderSeances(); renderFinances(); renderProgramme();
+  const results = await Promise.allSettled([loadDisciples(), loadSeances(), loadPresences(), loadTransactions(), loadProgramme(), loadMemo(), loadSuivis(), loadPrieres(), loadConfig()]);
+  results.forEach(r=>{ if(r.status==='rejected') showErrorBanner('Chargement : '+(r.reason?.message||r.reason)); });
+  safeRender('renderDashboard', renderDashboard);
+  safeRender('renderDisciples', renderDisciples);
+  safeRender('renderSeances', renderSeances);
+  safeRender('renderFinances', renderFinances);
+  safeRender('renderProgramme', renderProgramme);
+}
+function safeRender(name, fn){
+  try { fn(); } catch(e){ console.error(name, e); showErrorBanner(name+' : '+e.message); }
+}
+function showErrorBanner(msg){
+  let box = document.getElementById('error-banner');
+  if(!box){
+    box = document.createElement('div');
+    box.id = 'error-banner';
+    box.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#B4372A;color:#fff;padding:10px 16px;font-size:13px;z-index:9999;max-height:40vh;overflow-y:auto;';
+    document.body.prepend(box);
+  }
+  const line = document.createElement('div');
+  line.textContent = '⚠️ ' + msg;
+  box.appendChild(line);
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = '✕ Fermer';
+  closeBtn.style.cssText = 'display:block;margin-top:6px;background:#fff;color:#B4372A;border:none;border-radius:6px;padding:2px 8px;font-size:11px;';
+  closeBtn.onclick = () => box.remove();
+  box.appendChild(closeBtn);
+}
+window.addEventListener('error', (e)=> showErrorBanner('Erreur : '+e.message));
+window.addEventListener('unhandledrejection', (e)=> showErrorBanner('Erreur : '+(e.reason?.message||e.reason)));
+async function chk(promise, label){
+  const res = await promise;
+  if(res && res.error) showErrorBanner(label+' : '+res.error.message);
+  return res;
 }
 
 async function loadDisciples(){
@@ -504,7 +536,7 @@ function handleEtapeSelect(sel){
 async function confirmNewStatut(){
   const nom = document.getElementById('d-statut-newval').value.trim();
   if(!nom) return;
-  await sb.from('ministere_statuts').insert({workspace_id: wid(), nom, ordre: statuts.length});
+  await chk(sb.from('ministere_statuts').insert({workspace_id: wid(), nom, ordre: statuts.length}), 'Ajout statut');
   await loadConfig();
   document.getElementById('d-statut').value = nom;
   document.getElementById('d-statut-newbox').classList.add('hidden');
@@ -513,7 +545,7 @@ async function confirmNewStatut(){
 async function confirmNewEtape(){
   const nom = document.getElementById('d-etape-newval').value.trim();
   if(!nom) return;
-  await sb.from('ministere_etapes').insert({workspace_id: wid(), nom, ordre: etapes.length});
+  await chk(sb.from('ministere_etapes').insert({workspace_id: wid(), nom, ordre: etapes.length}), 'Ajout étape');
   await loadConfig();
   document.getElementById('d-etape').value = nom;
   document.getElementById('d-etape-newbox').classList.add('hidden');
@@ -791,8 +823,8 @@ async function saveDisciple(){
     besoins_spirituels: document.getElementById('d-besoins').value,
     parole_connaissance: document.getElementById('d-parole').value,
   };
-  if(id){ await sb.from('ministere_disciples').update(payload).eq('id', id); }
-  else { await sb.from('ministere_disciples').insert(payload); }
+  if(id){ await chk(sb.from('ministere_disciples').update(payload).eq('id', id), 'Enregistrement disciple'); }
+  else { await chk(sb.from('ministere_disciples').insert(payload), 'Enregistrement disciple'); }
   closeModal('modal-disciple'); await loadDisciples(); renderDisciples(); renderDashboard();
 }
 
@@ -812,34 +844,34 @@ function renderConfigLists(){
 }
 async function renameStatut(id, nom){
   if(!nom.trim()) return;
-  await sb.from('ministere_statuts').update({nom: nom.trim()}).eq('id', id);
+  await chk(sb.from('ministere_statuts').update({nom: nom.trim()}).eq('id', id), 'Renommage statut');
   await loadConfig();
 }
 async function renameEtape(id, nom){
   if(!nom.trim()) return;
-  await sb.from('ministere_etapes').update({nom: nom.trim()}).eq('id', id);
+  await chk(sb.from('ministere_etapes').update({nom: nom.trim()}).eq('id', id), 'Renommage étape');
   await loadConfig(); renderDashboard();
 }
 async function addStatut(){
   const nom = document.getElementById('cfg-statut-new').value.trim();
   if(!nom) return;
-  await sb.from('ministere_statuts').insert({workspace_id: wid(), nom, ordre: statuts.length});
+  await chk(sb.from('ministere_statuts').insert({workspace_id: wid(), nom, ordre: statuts.length}), 'Ajout statut');
   document.getElementById('cfg-statut-new').value='';
   await loadConfig(); renderConfigLists();
 }
 async function deleteStatut(id){
-  await sb.from('ministere_statuts').delete().eq('id', id);
+  await chk(sb.from('ministere_statuts').delete().eq('id', id), 'Suppression statut');
   await loadConfig(); renderConfigLists();
 }
 async function addEtape(){
   const nom = document.getElementById('cfg-etape-new').value.trim();
   if(!nom) return;
-  await sb.from('ministere_etapes').insert({workspace_id: wid(), nom, ordre: etapes.length});
+  await chk(sb.from('ministere_etapes').insert({workspace_id: wid(), nom, ordre: etapes.length}), 'Ajout étape');
   document.getElementById('cfg-etape-new').value='';
   await loadConfig(); renderConfigLists(); renderDashboard();
 }
 async function deleteEtape(id){
-  await sb.from('ministere_etapes').delete().eq('id', id);
+  await chk(sb.from('ministere_etapes').delete().eq('id', id), 'Suppression étape');
   await loadConfig(); renderConfigLists(); renderDashboard();
 }
 
@@ -900,8 +932,8 @@ function toggleProgEdit(){ document.getElementById('prog-edit').classList.toggle
 async function saveProgramme(){
   const payload = { workspace_id: wid(), nom: accountLabel(),
     jour: document.getElementById('prog-jour').value, heure: document.getElementById('prog-heure').value, lieu: document.getElementById('prog-lieu').value };
-  if(programme?.id) await sb.from('ministere_programme').update(payload).eq('id', programme.id);
-  else await sb.from('ministere_programme').insert(payload);
+  if(programme?.id) await chk(sb.from('ministere_programme').update(payload).eq('id', programme.id), 'Enregistrement programme');
+  else await chk(sb.from('ministere_programme').insert(payload), 'Enregistrement programme');
   await loadProgramme(); renderProgramme(); toggleProgEdit();
 }
 
@@ -983,10 +1015,11 @@ async function saveSeance(){
     observations: document.getElementById('s-obs').value,
     rubrique_valeur: programme?.rubrique_label ? document.getElementById('s-rubrique-valeur').value : null,
     todo_list: currentTodoList, preparation_suivante: document.getElementById('s-prep').value };
-  const {data} = await sb.from('ministere_seances').insert(payload).select();
+  const {data, error} = await sb.from('ministere_seances').insert(payload).select();
+  if(error){ showErrorBanner('Enregistrement séance : '+error.message); return; }
   const seanceId = data[0].id;
   const rows = Array.from(document.querySelectorAll('.s-present')).map(cb=>({workspace_id: wid(), seance_id: seanceId, disciple_id: cb.dataset.id, present: cb.checked}));
-  if(rows.length) await sb.from('ministere_presences').insert(rows);
+  if(rows.length) await chk(sb.from('ministere_presences').insert(rows), 'Enregistrement présences');
   closeModal('modal-seance'); await Promise.all([loadSeances(), loadPresences()]); renderSeances(); renderDashboard();
 }
 
@@ -1010,7 +1043,7 @@ async function addTransaction(){
     montant: Number(document.getElementById('fin-montant').value)||0, date_mvt: document.getElementById('fin-date').value || new Date().toISOString().slice(0,10),
     justificatif: document.getElementById('fin-justif').value, usage_sortie: document.getElementById('fin-usage').value };
   if(!payload.montant) return;
-  await sb.from('ministere_transactions').insert(payload);
+  await chk(sb.from('ministere_transactions').insert(payload), 'Enregistrement mouvement');
   ['fin-nom','fin-montant','fin-usage','fin-justif'].forEach(i=>document.getElementById(i).value='');
   await loadTransactions(); renderFinances(); renderDashboard();
 }

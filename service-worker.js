@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ministere-parole-v1';
+const CACHE_NAME = 'ministere-parole-v2'; // ⚠️ à incrémenter (v3, v4...) à chaque future mise à jour du fichier html
 const APP_SHELL = [
   './ministere.html',
   './manifest.json',
@@ -6,7 +6,6 @@ const APP_SHELL = [
   './icon-512.png'
 ];
 
-// Installation : on met en cache les fichiers de l'application (l'"app shell")
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
@@ -14,7 +13,6 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Activation : on supprime les anciennes versions du cache
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
@@ -24,15 +22,20 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Requêtes : app shell servi depuis le cache (rapide + fonctionne hors-ligne),
-// tout le reste (Supabase, polices, librairies) part sur le réseau normalement.
+// Stratégie "réseau d'abord" : on va toujours chercher la dernière version en ligne.
+// Le cache ne sert que de secours si le téléphone est hors-ligne.
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   const isAppShell = APP_SHELL.some((f) => url.pathname.endsWith(f.replace('./', '/')));
 
   if (isAppShell) {
     event.respondWith(
-      caches.match(event.request).then((cached) => cached || fetch(event.request))
+      fetch(event.request)
+        .then((response) => {
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()));
+          return response;
+        })
+        .catch(() => caches.match(event.request))
     );
   }
   // Les appels vers supabase.co et les CDN externes passent tels quels (réseau).
