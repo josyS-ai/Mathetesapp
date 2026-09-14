@@ -46,33 +46,41 @@
 </head>
 <body class="pb-24">
 
-<div id="app" class="max-w-5xl mx-auto px-4">
+<div class="md:flex md:min-h-screen">
 
-  <!-- HEADER -->
-  <header class="pt-6 pb-4">
-    <div class="flex items-center justify-between flex-wrap gap-3">
+  <!-- SIDEBAR (desktop) / BARRE SUPERIEURE (mobile) -->
+  <aside class="bg-white border-b md:border-b-0 md:border-r md:fixed md:inset-y-0 md:left-0 md:w-64 md:flex md:flex-col md:py-6 md:px-4 md:overflow-y-auto z-30" style="border-color:var(--line)">
+    <div class="flex items-center justify-between flex-wrap gap-3 px-4 pt-6 pb-4 md:px-0 md:pt-0 md:pb-6 md:block">
       <div>
-        <h1 class="text-2xl font-display font-bold" style="color:var(--navy)">Ministère de la Parole</h1>
-        <p class="text-sm text-gray-500">Suivi du programme de formation des disciples</p>
+        <h1 class="text-xl font-display font-bold" style="color:var(--navy)">📖 Ministère de la Parole</h1>
+        <p class="text-xs text-gray-500">Suivi du programme de formation</p>
       </div>
-      <div class="flex gap-2 items-center flex-wrap">
-        <button onclick="switchAccount('adultes')" id="btn-acct-adultes" class="acct-btn px-4 py-2 rounded-xl text-sm font-semibold">👤 Adultes</button>
-        <button onclick="switchAccount('jeunes')" id="btn-acct-jeunes" class="acct-btn px-4 py-2 rounded-xl text-sm font-semibold">🧑‍🎓 Jeunes</button>
-        <button onclick="switchAccount('enfants')" id="btn-acct-enfants" class="acct-btn px-4 py-2 rounded-xl text-sm font-semibold">🧸 Enfants</button>
-        <button id="btn-install" onclick="installApp()" class="hidden btn-gold text-sm">📲 Installer</button>
-      </div>
+      <button id="btn-install" onclick="installApp()" class="hidden btn-gold text-xs md:mt-3 md:w-full">📲 Installer</button>
     </div>
-  </header>
 
-  <!-- NAV -->
-  <nav class="flex gap-2 mb-6 flex-wrap">
-    <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border" data-tab="dashboard" onclick="showTab('dashboard')">Tableau de bord</button>
-    <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border" data-tab="disciples" onclick="showTab('disciples')">Disciples</button>
-    <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border" data-tab="seances" onclick="showTab('seances')">Séances</button>
-    <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border" data-tab="finances" onclick="showTab('finances')">Trésorerie & Bilans</button>
-    <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border" data-tab="prieres" onclick="showTab('prieres')">Témoignages & Prières</button>
-    <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border" data-tab="memo" onclick="showTab('memo')">Mémo du formateur</button>
-  </nav>
+    <div class="flex gap-2 items-center flex-wrap px-4 pb-4 md:px-0 md:flex-col md:items-stretch md:gap-1">
+      <button onclick="switchAccount('adultes')" id="btn-acct-adultes" class="acct-btn px-4 py-2 rounded-xl text-sm font-semibold md:w-full md:text-left">👤 Adultes</button>
+      <button onclick="switchAccount('jeunes')" id="btn-acct-jeunes" class="acct-btn px-4 py-2 rounded-xl text-sm font-semibold md:w-full md:text-left">🧑‍🎓 Jeunes</button>
+      <button onclick="switchAccount('enfants')" id="btn-acct-enfants" class="acct-btn px-4 py-2 rounded-xl text-sm font-semibold md:w-full md:text-left">🧸 Enfants</button>
+    </div>
+
+    <nav class="flex gap-2 mb-2 flex-wrap px-4 md:px-0 md:flex-col md:gap-1 md:mb-0 md:flex-1">
+      <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border md:w-full md:text-left" data-tab="dashboard" onclick="showTab('dashboard')">Tableau de bord</button>
+      <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border md:w-full md:text-left" data-tab="disciples" onclick="showTab('disciples')">Disciples</button>
+      <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border md:w-full md:text-left" data-tab="seances" onclick="showTab('seances')">Séances</button>
+      <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border md:w-full md:text-left" data-tab="finances" onclick="showTab('finances')">Trésorerie & Bilans</button>
+      <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border md:w-full md:text-left" data-tab="prieres" onclick="showTab('prieres')">Témoignages & Prières</button>
+      <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border md:w-full md:text-left" data-tab="memo" onclick="showTab('memo')">Mémo du formateur</button>
+      <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border md:w-full md:text-left" data-tab="evaluation" onclick="showTab('evaluation')">Évaluation 4C</button>
+    </nav>
+    <div class="px-4 md:px-0 md:border-t md:pt-3 md:mt-3" style="border-color:var(--line)">
+      <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border md:w-full md:text-left mb-3 md:mb-2" data-tab="parametres" onclick="showTab('parametres')">⚙️ Paramètres</button>
+      <p class="hidden md:block text-xs text-gray-400" id="sync-footer">● Synchronisé</p>
+    </div>
+  </aside>
+
+  <div class="flex-1 md:ml-64">
+<div id="app" class="max-w-5xl mx-auto px-4">
 
   <!-- ============ DASHBOARD ============ -->
   <section id="tab-dashboard" class="tab-content">
@@ -317,13 +325,154 @@
     <div id="guide-view" class="space-y-4 mb-8"></div>
     <div id="guide-edit" class="hidden space-y-4 mb-8"></div>
 
-    <div class="card p-4">
-      <h3 class="font-display font-semibold mb-3" style="color:var(--navy)">📝 Notes libres</h3>
-      <textarea id="memo-text" rows="10" placeholder="Vos notes personnelles, préparation, réflexions..."></textarea>
-      <button class="btn-navy mt-3" onclick="saveMemo()">Enregistrer les notes</button>
+    <div class="flex justify-between items-center mb-3">
+      <h3 class="font-display font-semibold" style="color:var(--navy)">📝 Notes libres</h3>
+      <button class="btn-outline text-sm" onclick="openNoteModal()">+ Nouvelle note</button>
+    </div>
+    <div id="notes-list" class="space-y-2"></div>
+  </section>
+
+  <!-- MODAL NOTE LIBRE -->
+  <div id="modal-note" class="fixed inset-0 modal-bg hidden items-center justify-center p-4 z-50">
+    <div class="card w-full max-w-md p-5">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-display font-bold text-lg" style="color:var(--navy)">Nouvelle note</h3>
+        <button onclick="closeModal('modal-note')">✕</button>
+      </div>
+      <div class="grid gap-2 mb-3">
+        <input id="note-date" type="date">
+        <input id="note-titre" placeholder="Titre / objet de la note">
+        <textarea id="note-contenu" rows="5" placeholder="Contenu..."></textarea>
+        <button class="btn-gold" onclick="saveNote()">Enregistrer la note</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ EVALUATION 4C ============ -->
+  <section id="tab-evaluation" class="tab-content">
+    <div class="mb-4">
+      <h2 class="font-display font-bold text-xl" style="color:var(--navy)">📊 Matrice d'Évaluation 4C</h2>
+      <p class="text-xs text-gray-500">Évaluation pratique pour valider le niveau d'un disciple.</p>
+    </div>
+    <div class="card p-4 mb-4">
+      <label class="text-xs text-gray-500">Disciple à évaluer</label>
+      <select id="ev-disciple" onchange="onEvDiscipleChange()" class="mb-3"></select>
+      <div class="grid md:grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs text-gray-500">1. Connaissance (Savoir)</label>
+          <select id="ev-connaissance">
+            <option value="1">1 — Répète sans comprendre / fausses doctrines</option>
+            <option value="2">2 — Comprend partiellement</option>
+            <option value="3">3 — Comprend et réexplique avec ses mots</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs text-gray-500">2. Caractère (Être)</label>
+          <select id="ev-caractere">
+            <option value="1">1 — Réactif, orgueilleux, refuse la correction</option>
+            <option value="2">2 — En progrès</option>
+            <option value="3">3 — Humble, enseignable, intègre</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs text-gray-500">3. Compétence (Savoir-faire)</label>
+          <select id="ev-competence">
+            <option value="1">1 — Stresse, panique seul, erreurs graves</option>
+            <option value="2">2 — Progresse, encore accompagné</option>
+            <option value="3">3 — Autonome sur le terrain</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs text-gray-500">4. Communication (Transmettre)</label>
+          <select id="ev-communication">
+            <option value="1">1 — Garde tout pour lui</option>
+            <option value="2">2 — Partage occasionnellement</option>
+            <option value="3">3 — Capable d'équiper d'autres disciples</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-navy mt-4" onclick="genererRecommandation()">Générer la Recommandation</button>
+      <div id="ev-resultat" class="mt-4"></div>
+    </div>
+
+    <h3 class="font-display font-semibold mb-2" style="color:var(--navy)">Historique des évaluations</h3>
+    <div id="ev-historique" class="space-y-2"></div>
+  </section>
+
+  <!-- ============ PARAMETRES ============ -->
+  <section id="tab-parametres" class="tab-content">
+    <div class="mb-4">
+      <h2 class="font-display font-bold text-xl" style="color:var(--navy)">Paramètres</h2>
+      <p class="text-xs text-gray-500">Sécurité, sauvegarde et gestion des données de l'application.</p>
+    </div>
+
+    <div class="card p-4 mb-3">
+      <h3 class="font-display font-semibold mb-2" style="color:var(--navy)">☁️ Synchronisation entre appareils</h3>
+      <p class="text-sm text-gray-600">Vos données sont automatiquement synchronisées en temps réel via Supabase. Ouvrez simplement ce même fichier (avec la même clé) sur un autre appareil connecté à internet pour retrouver toutes vos données, sur les 3 comptes (Adultes / Jeunes / Enfants).</p>
+    </div>
+
+    <div class="card p-4 mb-3">
+      <div class="flex justify-between items-center">
+        <h3 class="font-display font-semibold" style="color:var(--navy)">🔒 Code PIN</h3>
+        <span id="pin-status-badge" class="badge" style="background:#EFE3C8;color:#7A5B14">Désactivé</span>
+      </div>
+      <p class="text-sm text-gray-600 mb-3">Si activé, un code à 4 chiffres sera demandé à chaque ouverture de l'app sur cet appareil.</p>
+      <div class="flex gap-2 flex-wrap">
+        <button class="btn-outline text-sm" onclick="setupPin()">Changer le code</button>
+        <button class="btn-outline text-sm" onclick="lockNow()">Verrouiller maintenant</button>
+        <button class="text-sm px-4 py-2 rounded-xl font-semibold" style="color:#B4372A;border:1px solid #B4372A" onclick="disablePin()">Désactiver</button>
+      </div>
+    </div>
+
+    <div class="card p-4 mb-3">
+      <h3 class="font-display font-semibold mb-2" style="color:var(--navy)">⬇️ Exporter mes données (sauvegarde complète)</h3>
+      <p class="text-sm text-gray-600 mb-3">Télécharge un fichier contenant tout : disciples, séances, présences, finances, prières, témoignages, notes, évaluations — pour les 3 comptes. Gardez-le en lieu sûr (Drive, email...), faites-le régulièrement.</p>
+      <button class="btn-navy text-sm" onclick="exportAllData()">Exporter toutes les données (.json)</button>
+    </div>
+
+    <div class="card p-4 mb-3">
+      <h3 class="font-display font-semibold mb-2" style="color:var(--navy)">⬆️ Importer des données</h3>
+      <p class="text-sm text-gray-600 mb-3">Restaure un fichier de sauvegarde exporté depuis cette app. Les données importées s'ajoutent à celles déjà présentes (pas de remplacement automatique).</p>
+      <input type="file" id="import-file-input" accept="application/json" class="mb-2">
+      <button class="btn-outline text-sm" onclick="importAllData()">Importer ce fichier</button>
+    </div>
+
+    <div class="card p-4" style="border-color:#F3C6C0">
+      <h3 class="font-display font-semibold mb-2" style="color:#B4372A">🗑️ Réinitialiser toutes les données</h3>
+      <p class="text-sm text-gray-600 mb-3">Supprime définitivement toutes les données du compte actuellement sélectionné (<span id="reset-account-label"></span>). Cette action est irréversible.</p>
+      <button class="text-sm px-4 py-2 rounded-xl font-semibold text-white" style="background:#B4372A" onclick="resetAccountData()">Réinitialiser ce compte</button>
     </div>
   </section>
 
+</div>
+  </div>
+</div>
+
+<!-- ECRAN DE VERROUILLAGE PIN -->
+<div id="pin-lock-screen" class="hidden fixed inset-0 z-[9999] flex-col items-center justify-center gap-4" style="background:var(--navy)">
+  <div class="text-white text-center">
+    <div class="text-4xl mb-2">🔒</div>
+    <p class="font-display text-lg">Ministère de la Parole</p>
+    <p class="text-sm opacity-70">Entrez votre code PIN</p>
+  </div>
+  <input id="pin-lock-input" type="password" inputmode="numeric" maxlength="4" placeholder="••••" class="text-center text-2xl tracking-widest w-40" style="letter-spacing:.5em">
+  <button class="btn-gold" onclick="checkPinEntry()">Déverrouiller</button>
+  <p id="pin-lock-error" class="text-red-300 text-sm hidden">Code incorrect, réessayez.</p>
+</div>
+
+<!-- MODAL CONFIGURATION PIN -->
+<div id="modal-pin-setup" class="fixed inset-0 modal-bg hidden items-center justify-center p-4 z-50">
+  <div class="card w-full max-w-sm p-5">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="font-display font-bold text-lg" style="color:var(--navy)">Définir un code PIN</h3>
+      <button onclick="closeModal('modal-pin-setup')">✕</button>
+    </div>
+    <div class="grid gap-2 mb-3">
+      <input id="pin-new" type="password" inputmode="numeric" maxlength="4" placeholder="Nouveau code (4 chiffres)">
+      <input id="pin-confirm" type="password" inputmode="numeric" maxlength="4" placeholder="Confirmer le code">
+      <button class="btn-gold" onclick="confirmSetupPin()">Enregistrer le code</button>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL DISCIPLE -->
@@ -509,7 +658,7 @@ function closeModal(id){ document.getElementById(id).classList.add('hidden'); do
 function openModal(id){ document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
 
 async function loadAll(){
-  const results = await Promise.allSettled([loadDisciples(), loadSeances(), loadPresences(), loadTransactions(), loadProgramme(), loadMemo(), loadSuivis(), loadPrieres(), loadConfig(), loadTemoignages()]);
+  const results = await Promise.allSettled([loadDisciples(), loadSeances(), loadPresences(), loadTransactions(), loadProgramme(), loadMemo(), loadSuivis(), loadPrieres(), loadConfig(), loadTemoignages(), loadNotes(), loadEvaluations()]);
   results.forEach(r=>{ if(r.status==='rejected') showErrorBanner('Chargement : '+(r.reason?.message||r.reason)); });
   safeRender('renderDashboard', renderDashboard);
   safeRender('renderDisciples', renderDisciples);
@@ -519,6 +668,9 @@ async function loadAll(){
   safeRender('renderPrieresTab', renderPrieresTab);
   safeRender('renderTemoignagesList', renderTemoignagesList);
   safeRender('renderGuideView', renderGuideView);
+  safeRender('renderNotesList', renderNotesList);
+  safeRender('renderEvaluationTab', renderEvaluationTab);
+  safeRender('renderParametres', renderParametres);
 }
 function safeRender(name, fn){
   try { fn(); } catch(e){ console.error(name, e); showErrorBanner(name+' : '+e.message); }
@@ -614,8 +766,17 @@ async function loadMemo(){
   const {data} = await sb.from('ministere_memo').select('*').eq('workspace_id', wid()).limit(1);
   const row = data && data[0];
   memoRowId = row ? row.id : null;
-  document.getElementById('memo-text').value = (row && row.contenu) || '';
   currentGuide = (row && row.guide_json) ? row.guide_json : JSON.parse(JSON.stringify(DEFAULT_GUIDE));
+}
+let notes = [];
+async function loadNotes(){
+  const {data} = await sb.from('ministere_notes').select('*').eq('workspace_id', wid()).order('date_note',{ascending:false});
+  notes = data || [];
+}
+let evaluations = [];
+async function loadEvaluations(){
+  const {data} = await sb.from('ministere_evaluations').select('*').eq('workspace_id', wid()).order('date_eval',{ascending:false});
+  evaluations = data || [];
 }
 async function loadSuivis(){
   const {data} = await sb.from('ministere_suivis').select('*').eq('workspace_id', wid()).order('date_prevue');
@@ -1357,15 +1518,37 @@ function exportBilanPDF(){
 }
 
 /* ---------- MEMO ---------- */
-async function saveMemo(){
-  const contenu = document.getElementById('memo-text').value;
-  if(memoRowId) await chk(sb.from('ministere_memo').update({contenu}).eq('id', memoRowId), 'Enregistrement notes');
-  else {
-    const {data, error} = await sb.from('ministere_memo').insert({workspace_id: wid(), contenu, guide_json: currentGuide}).select();
-    if(error) showErrorBanner('Enregistrement notes : '+error.message);
-    else if(data && data[0]) memoRowId = data[0].id;
-  }
-  alert('Notes enregistrées.');
+function openNoteModal(){
+  document.getElementById('note-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('note-titre').value = '';
+  document.getElementById('note-contenu').value = '';
+  openModal('modal-note');
+}
+async function saveNote(){
+  const titre = document.getElementById('note-titre').value.trim();
+  const contenu = document.getElementById('note-contenu').value.trim();
+  if(!titre && !contenu) return;
+  const payload = { workspace_id: wid(), date_note: document.getElementById('note-date').value || new Date().toISOString().slice(0,10), titre, contenu };
+  await chk(sb.from('ministere_notes').insert(payload), 'Enregistrement note');
+  closeModal('modal-note');
+  await loadNotes(); renderNotesList();
+}
+async function deleteNote(id){
+  if(!confirm('Supprimer cette note ?')) return;
+  await chk(sb.from('ministere_notes').delete().eq('id', id), 'Suppression note');
+  await loadNotes(); renderNotesList();
+}
+function renderNotesList(){
+  const el = document.getElementById('notes-list');
+  if(!el) return;
+  el.innerHTML = notes.map(n=>`
+    <div class="card p-3">
+      <div class="flex justify-between items-start">
+        <div><b>${n.titre||'(sans titre)'}</b></div>
+        <div class="flex items-center gap-2"><span class="text-xs text-gray-400">${n.date_note||''}</span><button class="text-red-400 text-xs" onclick="deleteNote('${n.id}')">✕</button></div>
+      </div>
+      ${n.contenu?`<p class="text-sm text-gray-600 mt-1 whitespace-pre-wrap">${n.contenu}</p>`:''}
+    </div>`).join('') || '<p class="text-gray-400">Aucune note pour le moment.</p>';
 }
 
 /* ---------- GUIDE DU FORMATEUR ---------- */
@@ -1510,7 +1693,7 @@ async function saveGuide(){
   currentGuide = g;
   if(memoRowId) await chk(sb.from('ministere_memo').update({guide_json: g}).eq('id', memoRowId), 'Enregistrement guide');
   else {
-    const {data, error} = await sb.from('ministere_memo').insert({workspace_id: wid(), contenu: document.getElementById('memo-text').value, guide_json: g}).select();
+    const {data, error} = await sb.from('ministere_memo').insert({workspace_id: wid(), guide_json: g}).select();
     if(error) showErrorBanner('Enregistrement guide : '+error.message);
     else if(data && data[0]) memoRowId = data[0].id;
   }
@@ -1522,6 +1705,181 @@ async function saveGuide(){
 updateAccountUI();
 showTab('dashboard');
 loadAll();
+checkPinOnLoad();
+
+/* ---------- EVALUATION 4C ---------- */
+function renderEvaluationTab(){
+  const sel = document.getElementById('ev-disciple');
+  if(!sel) return;
+  const prev = sel.value;
+  sel.innerHTML = disciples.map(d=>`<option value="${d.id}">${d.prenom} ${d.nom} (${d.etape_parcours||''})</option>`).join('') || '<option value="">Aucun disciple</option>';
+  if(prev) sel.value = prev;
+  document.getElementById('ev-resultat').innerHTML = '';
+  renderEvHistorique();
+}
+function onEvDiscipleChange(){
+  document.getElementById('ev-resultat').innerHTML = '';
+}
+function renderEvHistorique(){
+  const el = document.getElementById('ev-historique');
+  if(!el) return;
+  el.innerHTML = [...evaluations].map(e=>{
+    const d = disciples.find(x=>x.id===e.disciple_id);
+    return `<div class="card p-3 flex justify-between items-center">
+      <div><b>${d?d.prenom+' '+d.nom:'(disciple supprimé)'}</b> <span class="text-xs text-gray-400">— ${e.date_eval||''}</span>
+        <div class="text-xs text-gray-500">C:${e.connaissance} · Caractère:${e.caractere} · Compétence:${e.competence} · Communication:${e.communication}</div>
+      </div>
+      <div class="text-right">
+        <div class="text-sm">${e.recommandation||''}</div>
+        <button class="text-red-400 text-xs" onclick="deleteEvaluation('${e.id}')">✕ Supprimer</button>
+      </div>
+    </div>`;
+  }).join('') || '<p class="text-gray-400">Aucune évaluation enregistrée.</p>';
+}
+async function deleteEvaluation(id){
+  if(!confirm('Supprimer cette évaluation ?')) return;
+  await chk(sb.from('ministere_evaluations').delete().eq('id', id), 'Suppression évaluation');
+  await loadEvaluations(); renderEvHistorique();
+}
+async function genererRecommandation(){
+  const discipleId = document.getElementById('ev-disciple').value;
+  if(!discipleId){ showErrorBanner('Sélectionnez un disciple à évaluer.'); return; }
+  const c = Number(document.getElementById('ev-connaissance').value);
+  const ca = Number(document.getElementById('ev-caractere').value);
+  const co = Number(document.getElementById('ev-competence').value);
+  const cm = Number(document.getElementById('ev-communication').value);
+  const total = c+ca+co+cm;
+  let profil, couleur, bg, texte, next;
+  if(total>=11){
+    profil='🟢 Passage au niveau supérieur (Formateur / Leader)'; bg='#EAF6EE'; couleur='var(--ok)';
+    texte="Il maîtrise la pratique, fait preuve d'autonomie et manifeste un caractère enseignable.";
+    next="Prochaine étape : lui déléguer une responsabilité et lui confier un ou deux disciples à accompagner.";
+  } else if(total>=7){
+    profil='🟡 Module de Consolidation (Rattrapage ciblé)'; bg='#FBF3DE'; couleur='#7A5B14';
+    texte="Il a la théorie, mais manque d'assurance sur le terrain, ou son caractère retient encore ses compétences.";
+    next="Prochaine étape : refaire uniquement le module spécifique où se trouve le manque (ex : stage pratique en binôme pendant 1 mois).";
+  } else {
+    profil='🔴 Reprise du parcours de base'; bg='#FBEAEA'; couleur='#B4372A';
+    texte="Absence d'engagement, manque de transformation visible du caractère, non-assimilation des vérités fondamentales.";
+    next="Prochaine étape : entretien pastoral bienveillant pour comprendre les blocages, et remise à plat de la relation d'accompagnement.";
+  }
+  const recommandation = profil;
+  document.getElementById('ev-resultat').innerHTML = `
+    <div class="rounded-xl p-4" style="background:${bg}">
+      <div class="font-semibold mb-1" style="color:${couleur}">${profil}</div>
+      <p class="text-sm text-gray-700 mb-1">${texte}</p>
+      <p class="text-sm text-gray-600 italic">${next}</p>
+    </div>`;
+  const payload = { workspace_id: wid(), disciple_id: discipleId, date_eval: new Date().toISOString().slice(0,10),
+    connaissance:c, caractere:ca, competence:co, communication:cm, recommandation };
+  await chk(sb.from('ministere_evaluations').insert(payload), 'Enregistrement évaluation');
+  await loadEvaluations(); renderEvHistorique();
+}
+
+/* ---------- PARAMETRES : PIN ---------- */
+function renderParametres(){
+  const label = document.getElementById('reset-account-label');
+  if(label) label.textContent = account==='adultes'?'Adultes':account==='jeunes'?'Jeunes':'Enfants';
+  updatePinBadge();
+}
+function updatePinBadge(){
+  const badge = document.getElementById('pin-status-badge');
+  if(!badge) return;
+  const has = !!localStorage.getItem('ministere_pin');
+  badge.textContent = has ? 'Activé' : 'Désactivé';
+  badge.style.background = has ? '#DCEEE1' : '#EFE3C8';
+  badge.style.color = has ? 'var(--ok)' : '#7A5B14';
+}
+function setupPin(){
+  document.getElementById('pin-new').value = '';
+  document.getElementById('pin-confirm').value = '';
+  openModal('modal-pin-setup');
+}
+function confirmSetupPin(){
+  const p1 = document.getElementById('pin-new').value.trim();
+  const p2 = document.getElementById('pin-confirm').value.trim();
+  if(!/^\d{4}$/.test(p1)){ showErrorBanner('Le code doit contenir exactement 4 chiffres.'); return; }
+  if(p1 !== p2){ showErrorBanner('Les deux codes ne correspondent pas.'); return; }
+  localStorage.setItem('ministere_pin', p1);
+  closeModal('modal-pin-setup');
+  updatePinBadge();
+}
+function disablePin(){
+  if(!confirm('Désactiver le code PIN sur cet appareil ?')) return;
+  localStorage.removeItem('ministere_pin');
+  updatePinBadge();
+}
+function lockNow(){
+  showPinLock();
+}
+function showPinLock(){
+  const el = document.getElementById('pin-lock-screen');
+  el.classList.remove('hidden'); el.classList.add('flex');
+  document.getElementById('pin-lock-input').value = '';
+  document.getElementById('pin-lock-error').classList.add('hidden');
+}
+function checkPinEntry(){
+  const entered = document.getElementById('pin-lock-input').value.trim();
+  const real = localStorage.getItem('ministere_pin');
+  if(entered === real){
+    const el = document.getElementById('pin-lock-screen');
+    el.classList.add('hidden'); el.classList.remove('flex');
+  } else {
+    document.getElementById('pin-lock-error').classList.remove('hidden');
+  }
+}
+function checkPinOnLoad(){
+  if(localStorage.getItem('ministere_pin')) showPinLock();
+}
+
+/* ---------- PARAMETRES : EXPORT / IMPORT / RESET ---------- */
+const ALL_TABLES = ['ministere_disciples','ministere_journal_disciple','ministere_programme','ministere_seances','ministere_presences','ministere_transactions','ministere_memo','ministere_suivis','ministere_prieres','ministere_temoignages','ministere_notes','ministere_evaluations','ministere_statuts','ministere_etapes'];
+async function exportAllData(){
+  const backup = { exported_at: new Date().toISOString(), accounts: {} };
+  for(const acc of ['adultes','jeunes','enfants']){
+    backup.accounts[acc] = {};
+    for(const table of ALL_TABLES){
+      const {data, error} = await sb.from(table).select('*').eq('workspace_id', 'ministere_'+acc);
+      if(error){ showErrorBanner('Export '+table+' : '+error.message); continue; }
+      backup.accounts[acc][table] = data || [];
+    }
+  }
+  const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `ministere_sauvegarde_${new Date().toISOString().slice(0,10)}.json`; a.click();
+}
+async function importAllData(){
+  const fileInput = document.getElementById('import-file-input');
+  const file = fileInput.files[0];
+  if(!file){ showErrorBanner('Choisissez un fichier .json à importer.'); return; }
+  try{
+    const text = await file.text();
+    const backup = JSON.parse(text);
+    if(!backup.accounts){ showErrorBanner('Fichier de sauvegarde invalide.'); return; }
+    for(const acc of Object.keys(backup.accounts)){
+      for(const table of Object.keys(backup.accounts[acc])){
+        const rows = backup.accounts[acc][table];
+        if(!Array.isArray(rows) || !rows.length) continue;
+        const cleanRows = rows.map(r=>{ const {id, ...rest} = r; return rest; });
+        const {error} = await sb.from(table).insert(cleanRows);
+        if(error) showErrorBanner('Import '+table+' : '+error.message);
+      }
+    }
+    alert('Import terminé.');
+    await loadAll();
+  } catch(e){
+    showErrorBanner('Import : fichier illisible ('+e.message+')');
+  }
+}
+async function resetAccountData(){
+  if(!confirm(`Supprimer TOUTES les données du compte ${account} ? Cette action est irréversible.`)) return;
+  if(!confirm('Confirmez-vous une dernière fois ? Il n\u2019y aura pas de retour en arrière possible.')) return;
+  for(const table of ALL_TABLES){
+    const {error} = await sb.from(table).delete().eq('workspace_id', wid());
+    if(error) showErrorBanner('Réinitialisation '+table+' : '+error.message);
+  }
+  await loadAll();
+  alert('Données réinitialisées pour ce compte.');
+}
 
 /* ---------- PWA : service worker + installation ---------- */
 if ('serviceWorker' in navigator) {
