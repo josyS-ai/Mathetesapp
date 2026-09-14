@@ -408,7 +408,8 @@
 
     <div class="card p-4 mb-3">
       <h3 class="font-display font-semibold mb-2" style="color:var(--navy)">☁️ Synchronisation entre appareils</h3>
-      <p class="text-sm text-gray-600">Vos données sont automatiquement synchronisées en temps réel via Supabase. Ouvrez simplement ce même fichier (avec la même clé) sur un autre appareil connecté à internet pour retrouver toutes vos données, sur les 3 comptes (Adultes / Jeunes / Enfants).</p>
+      <p class="text-sm text-gray-600">Contrairement à vos autres apps, il n'y a pas de code à saisir ici : la connexion à votre base de données est déjà intégrée directement dans ce fichier <code>ministere.html</code>. La synchronisation est donc automatique et immédiate entre tous les appareils qui ouvrent <b>ce même fichier</b> (les 3 comptes Adultes / Jeunes / Enfants y sont déjà inclus).</p>
+      <p class="text-sm text-gray-600 mt-2">Pour ajouter un nouvel appareil : envoyez-vous simplement ce fichier <code>ministere.html</code> (par WhatsApp, email, Drive...) et ouvrez-le sur l'autre appareil — les données seront les mêmes des deux côtés en temps réel.</p>
     </div>
 
     <div class="card p-4 mb-3">
@@ -432,14 +433,16 @@
 
     <div class="card p-4 mb-3">
       <h3 class="font-display font-semibold mb-2" style="color:var(--navy)">⬆️ Importer des données</h3>
-      <p class="text-sm text-gray-600 mb-3">Restaure un fichier de sauvegarde exporté depuis cette app. Les données importées s'ajoutent à celles déjà présentes (pas de remplacement automatique).</p>
+      <p class="text-sm text-gray-600 mb-3">Restaure une sauvegarde précédemment exportée, ou transfère vos données vers un autre appareil.<br><b>Attention :</b> cela remplace entièrement les données actuelles (des 3 comptes). Exportez d'abord si vous voulez garder une copie de secours.</p>
       <input type="file" id="import-file-input" accept="application/json" class="mb-2">
       <button class="btn-outline text-sm" onclick="importAllData()">Importer ce fichier</button>
     </div>
 
     <div class="card p-4" style="border-color:#F3C6C0">
       <h3 class="font-display font-semibold mb-2" style="color:#B4372A">🗑️ Réinitialiser toutes les données</h3>
-      <p class="text-sm text-gray-600 mb-3">Supprime définitivement toutes les données du compte actuellement sélectionné (<span id="reset-account-label"></span>). Cette action est irréversible.</p>
+      <p class="text-sm font-semibold" style="color:#B4372A">Action irréversible.</p>
+      <p class="text-sm text-gray-600 mb-2">Supprime définitivement toutes les données du compte actuellement sélectionné (<span id="reset-account-label"></span>) : disciples, séances, finances, prières, témoignages, notes, évaluations.</p>
+      <p class="text-sm text-gray-600 mb-3"><b>Exportez d'abord une sauvegarde ci-dessus</b> si vous voulez pouvoir revenir en arrière.</p>
       <button class="text-sm px-4 py-2 rounded-xl font-semibold text-white" style="background:#B4372A" onclick="resetAccountData()">Réinitialiser ce compte</button>
     </div>
   </section>
@@ -1851,11 +1854,16 @@ async function importAllData(){
   const fileInput = document.getElementById('import-file-input');
   const file = fileInput.files[0];
   if(!file){ showErrorBanner('Choisissez un fichier .json à importer.'); return; }
+  if(!confirm("Cela va REMPLACER toutes les données actuelles (des 3 comptes) par celles du fichier. Continuer ?")) return;
   try{
     const text = await file.text();
     const backup = JSON.parse(text);
     if(!backup.accounts){ showErrorBanner('Fichier de sauvegarde invalide.'); return; }
     for(const acc of Object.keys(backup.accounts)){
+      const accWid = 'ministere_'+acc;
+      for(const table of ALL_TABLES){
+        await sb.from(table).delete().eq('workspace_id', accWid);
+      }
       for(const table of Object.keys(backup.accounts[acc])){
         const rows = backup.accounts[acc][table];
         if(!Array.isArray(rows) || !rows.length) continue;
@@ -1864,7 +1872,7 @@ async function importAllData(){
         if(error) showErrorBanner('Import '+table+' : '+error.message);
       }
     }
-    alert('Import terminé.');
+    alert('Import terminé — les données ont été remplacées.');
     await loadAll();
   } catch(e){
     showErrorBanner('Import : fichier illisible ('+e.message+')');
