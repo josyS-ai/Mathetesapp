@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ministère de la Parole</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1E3A5F">
+<meta name="theme-color" content="#2D3A2F">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,16 +16,16 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --navy:#1E3A5F; --navy-dark:#132C48; --gold:#C89B3C; --gold-light:#E7C878;
-    --cream:#F9F6F0; --ink:#232323; --enfant:#C1622E; --enfant-light:#F3D9C9;
+    --navy:#2D3A2F; --navy-dark:#1F2921; --gold:#E07A5F; --gold-light:#F5D9CD;
+    --cream:#F7F9F6; --ink:#1A211C; --enfant:#C1622E; --enfant-light:#F3D9C9;
     --jeune:#4F46E5; --jeune-light:#E0E7FF;
-    --ok:#2F7A4F; --warn:#B9542A; --line:#E4DED0;
+    --ok:#2F7A4F; --warn:#B9542A; --line:#E4E4DC;
   }
-  body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--ink);}
-  h1,h2,h3,.font-display{font-family:'Fraunces',serif;}
+  body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:var(--ink);}
+  h1,h2,h3,.font-display{font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;}
   .tab-content{display:none;} .tab-content.active{display:block;}
   .navbtn{transition:.15s;} .navbtn.active{background:var(--navy);color:#fff;}
   .acct-btn{transition:.15s;border:2px solid transparent;}
@@ -267,7 +267,7 @@
     </div>
     <div class="grid md:grid-cols-2 gap-4">
       <div class="card p-4">
-        <h3 class="font-display font-semibold mb-3 flex items-center gap-2" style="color:var(--navy)">🙏 Sujets en cours <span class="badge" style="background:var(--gold-light);color:#7A5B14" id="pt-count-encours"></span></h3>
+        <h3 class="font-display font-semibold mb-3 flex items-center gap-2" style="color:var(--navy)">🙏 Sujets en cours <span class="badge" style="background:var(--gold-light);color:#A8451F" id="pt-count-encours"></span></h3>
         <div id="pt-encours" class="space-y-2"></div>
       </div>
       <div class="card p-4">
@@ -408,14 +408,13 @@
 
     <div class="card p-4 mb-3">
       <h3 class="font-display font-semibold mb-2" style="color:var(--navy)">☁️ Synchronisation entre appareils</h3>
-      <p class="text-sm text-gray-600">Contrairement à vos autres apps, il n'y a pas de code à saisir ici : la connexion à votre base de données est déjà intégrée directement dans ce fichier <code>ministere.html</code>. La synchronisation est donc automatique et immédiate entre tous les appareils qui ouvrent <b>ce même fichier</b> (les 3 comptes Adultes / Jeunes / Enfants y sont déjà inclus).</p>
-      <p class="text-sm text-gray-600 mt-2">Pour ajouter un nouvel appareil : envoyez-vous simplement ce fichier <code>ministere.html</code> (par WhatsApp, email, Drive...) et ouvrez-le sur l'autre appareil — les données seront les mêmes des deux côtés en temps réel.</p>
+      <p class="text-sm text-gray-600">Vos données sont automatiquement synchronisées en temps réel via Supabase. Ouvrez simplement ce même fichier (avec la même clé) sur un autre appareil connecté à internet pour retrouver toutes vos données, sur les 3 comptes (Adultes / Jeunes / Enfants).</p>
     </div>
 
     <div class="card p-4 mb-3">
       <div class="flex justify-between items-center">
         <h3 class="font-display font-semibold" style="color:var(--navy)">🔒 Code PIN</h3>
-        <span id="pin-status-badge" class="badge" style="background:#EFE3C8;color:#7A5B14">Désactivé</span>
+        <span id="pin-status-badge" class="badge" style="background:#F5D9CD;color:#A8451F">Désactivé</span>
       </div>
       <p class="text-sm text-gray-600 mb-3">Si activé, un code à 4 chiffres sera demandé à chaque ouverture de l'app sur cet appareil.</p>
       <div class="flex gap-2 flex-wrap">
@@ -911,7 +910,7 @@ function renderDashboard(){
   }).filter(x=>x.days<=60).sort((a,b)=>a.days-b.days).slice(0,6);
   document.getElementById('birthdays-box').innerHTML = bdays.length ? bdays.map(x=>
     `<div class="flex items-center justify-between p-2 rounded-lg bg-gray-50"><div><b>${x.d.prenom} ${x.d.nom}</b><div class="text-xs text-gray-500">${x.dateStr}</div></div>
-    <span class="badge" style="background:var(--gold-light);color:#7A5B14">Dans ${x.days} j.</span></div>`
+    <span class="badge" style="background:var(--gold-light);color:#A8451F">Dans ${x.days} j.</span></div>`
   ).join('') : '<p class="text-gray-400">Aucun anniversaire dans les 60 prochains jours.</p>';
 
   // suivi des séances & présences (tableau) — n° de séance sur le thème + statut
@@ -931,7 +930,7 @@ function renderDashboard(){
     const statut = s.statut_theme || 'En cours';
     return `<tr class="border-b"><td class="py-2">${s.date_seance}</td><td>${s.theme||'—'}</td>
       <td>${key ? s._themeIndex+'/'+total : '—'}</td>
-      <td><span class="badge" style="background:${statut==='Complété'?'#DCEEE1':'#EFE3C8'};color:${statut==='Complété'?'var(--ok)':'#7A5B14'}">${statut}</span></td>
+      <td><span class="badge" style="background:${statut==='Complété'?'#DCEEE1':'#F5D9CD'};color:${statut==='Complété'?'var(--ok)':'#A8451F'}">${statut}</span></td>
       <td>${nbP}/${list.length}</td></tr>`;
   }).join('') || `<tr><td colspan="5" class="py-2 text-gray-400">Aucune séance enregistrée.</td></tr>`;
 
@@ -997,7 +996,7 @@ function renderSuiviList(){
     return `<div class="flex items-center justify-between p-2 rounded-lg bg-gray-50">
       <span>${d?d.prenom+' '+d.nom:'?'} — ${s.date_prevue} ${s.notes?'· '+s.notes:''}</span>
       <span class="flex items-center gap-2">
-        <span class="badge" style="background:${s.statut==='Fait'?'#DCEEE1':'#EFE3C8'};color:${s.statut==='Fait'?'var(--ok)':'#7A5B14'}">${s.statut}</span>
+        <span class="badge" style="background:${s.statut==='Fait'?'#DCEEE1':'#F5D9CD'};color:${s.statut==='Fait'?'var(--ok)':'#A8451F'}">${s.statut}</span>
         ${s.statut==='Prévu'?`<button class="text-xs underline" onclick="markSuiviFait('${s.id}')">Marquer fait</button>`:''}
       </span></div>`;
   }).join('') || '<p class="text-gray-400">Aucun entretien planifié.</p>';
@@ -1166,7 +1165,7 @@ function renderDisciples(){
         </div>
         ${d.baptise ? '<span class="badge" style="background:#DCEEE1;color:var(--ok)">Baptisé</span>' : ''}
       </div>
-      <span class="badge mt-2 inline-block" style="background:#EFE3C8;color:#7A5B14">${d.etape_parcours||'Accueil'}</span>
+      <span class="badge mt-2 inline-block" style="background:#F5D9CD;color:#A8451F">${d.etape_parcours||'Accueil'}</span>
     </div>`).join('') || '<p class="text-gray-400 col-span-3">Aucun disciple pour ce compte.</p>';
 }
 
@@ -1606,7 +1605,7 @@ function renderGuideView(){
       <h3 class="font-display font-semibold mb-2" style="color:var(--navy)">✅ Checklist d'auto-évaluation</h3>
       <ul class="text-sm space-y-1 list-disc pl-5">${g.checklist.map(c=>`<li>${c}</li>`).join('')}</ul>
     </div>
-    <div class="rounded-xl p-4" style="background:#FBF3DE">
+    <div class="rounded-xl p-4" style="background:#EAF0EA">
       ${g.reglesOr.map(r=>`<p class="text-sm italic mb-1">💡 « ${r} »</p>`).join('')}
     </div>
   `;
@@ -1758,7 +1757,7 @@ async function genererRecommandation(){
     texte="Il maîtrise la pratique, fait preuve d'autonomie et manifeste un caractère enseignable.";
     next="Prochaine étape : lui déléguer une responsabilité et lui confier un ou deux disciples à accompagner.";
   } else if(total>=7){
-    profil='🟡 Module de Consolidation (Rattrapage ciblé)'; bg='#FBF3DE'; couleur='#7A5B14';
+    profil='🟡 Module de Consolidation (Rattrapage ciblé)'; bg='#EAF0EA'; couleur='#A8451F';
     texte="Il a la théorie, mais manque d'assurance sur le terrain, ou son caractère retient encore ses compétences.";
     next="Prochaine étape : refaire uniquement le module spécifique où se trouve le manque (ex : stage pratique en binôme pendant 1 mois).";
   } else {
@@ -1790,8 +1789,8 @@ function updatePinBadge(){
   if(!badge) return;
   const has = !!localStorage.getItem('ministere_pin');
   badge.textContent = has ? 'Activé' : 'Désactivé';
-  badge.style.background = has ? '#DCEEE1' : '#EFE3C8';
-  badge.style.color = has ? 'var(--ok)' : '#7A5B14';
+  badge.style.background = has ? '#DCEEE1' : '#F5D9CD';
+  badge.style.color = has ? 'var(--ok)' : '#A8451F';
 }
 function setupPin(){
   document.getElementById('pin-new').value = '';
