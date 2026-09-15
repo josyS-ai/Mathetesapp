@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ministère de la Parole</title>
+<title>Mathetēs</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#2D3A2F">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Ministère">
+<meta name="apple-mobile-web-app-title" content="Mathetēs">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -31,6 +31,11 @@
   .acct-btn{transition:.15s;border:2px solid transparent;}
   .acct-btn.active-adulte{background:var(--navy);color:#fff;border-color:var(--navy);}
   .periode-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .text-gray-400{color:#6B7280 !important;}
+  .text-gray-500{color:#52525B !important;}
+  .text-gray-600{color:#3F3F46 !important;}
+  .bottombtn{color:#6B7280;background:transparent;border:none;}
+  .bottombtn.active{color:var(--navy);font-weight:600;}
   .acct-btn.active-jeune{background:var(--jeune);color:#fff;border-color:var(--jeune);}
   .acct-btn.active-enfant{background:var(--enfant);color:#fff;border-color:var(--enfant);}
   .card{background:#fff;border:1px solid var(--line);border-radius:14px;}
@@ -52,7 +57,7 @@
   <aside class="bg-white border-b md:border-b-0 md:border-r md:fixed md:inset-y-0 md:left-0 md:w-64 md:flex md:flex-col md:py-6 md:px-4 md:overflow-y-auto z-30" style="border-color:var(--line)">
     <div class="flex items-center justify-between flex-wrap gap-3 px-4 pt-6 pb-4 md:px-0 md:pt-0 md:pb-6 md:block">
       <div>
-        <h1 class="text-xl font-display font-bold" style="color:var(--navy)">📖 Ministère de la Parole</h1>
+        <h1 class="text-xl font-display font-bold" style="color:var(--navy)">📖 Mathetēs</h1>
         <p class="text-xs text-gray-500">Suivi du programme de formation</p>
       </div>
       <button id="btn-install" onclick="installApp()" class="hidden btn-gold text-xs md:mt-3 md:w-full">📲 Installer</button>
@@ -64,20 +69,47 @@
       <button onclick="switchAccount('enfants')" id="btn-acct-enfants" class="acct-btn px-4 py-2 rounded-xl text-sm font-semibold md:w-full md:text-left">🧸 Enfants</button>
     </div>
 
-    <nav class="flex gap-2 mb-2 flex-wrap px-4 md:px-0 md:flex-col md:gap-1 md:mb-0 md:flex-1">
+    <nav class="hidden md:flex gap-2 mb-2 flex-wrap px-4 md:px-0 md:flex-col md:gap-1 md:mb-0 md:flex-1">
       <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border md:w-full md:text-left" data-tab="dashboard" onclick="showTab('dashboard')">Tableau de bord</button>
       <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border md:w-full md:text-left" data-tab="disciples" onclick="showTab('disciples')">Disciples</button>
       <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border md:w-full md:text-left" data-tab="seances" onclick="showTab('seances')">Séances</button>
       <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border md:w-full md:text-left" data-tab="finances" onclick="showTab('finances')">Trésorerie & Bilans</button>
       <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border md:w-full md:text-left" data-tab="prieres" onclick="showTab('prieres')">Témoignages & Prières</button>
+      <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border md:w-full md:text-left" data-tab="guide" onclick="showTab('guide')">Guide du formateur</button>
       <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border md:w-full md:text-left" data-tab="memo" onclick="showTab('memo')">Mémo du formateur</button>
       <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border md:w-full md:text-left" data-tab="evaluation" onclick="showTab('evaluation')">Évaluation 4C</button>
     </nav>
-    <div class="px-4 md:px-0 md:border-t md:pt-3 md:mt-3" style="border-color:var(--line)">
+    <div class="hidden md:block px-4 md:px-0 md:border-t md:pt-3 md:mt-3" style="border-color:var(--line)">
       <button class="navbtn px-4 py-2 rounded-xl text-sm font-medium bg-white border md:w-full md:text-left mb-3 md:mb-2" data-tab="parametres" onclick="showTab('parametres')">⚙️ Paramètres</button>
       <p class="hidden md:block text-xs text-gray-400" id="sync-footer">● Synchronisé</p>
     </div>
   </aside>
+
+  <!-- BARRE DU BAS (mobile uniquement) -->
+  <nav id="bottom-nav" class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t flex justify-around items-center py-2" style="border-color:var(--line)">
+    <button class="bottombtn flex flex-col items-center gap-0.5 text-xs px-2" data-tab="dashboard" onclick="showTab('dashboard')"><span class="text-lg">🏠</span>Accueil</button>
+    <button class="bottombtn flex flex-col items-center gap-0.5 text-xs px-2" data-tab="disciples" onclick="showTab('disciples')"><span class="text-lg">👥</span>Disciples</button>
+    <button class="bottombtn flex flex-col items-center gap-0.5 text-xs px-2" data-tab="seances" onclick="showTab('seances')"><span class="text-lg">🗓️</span>Séances</button>
+    <button class="bottombtn flex flex-col items-center gap-0.5 text-xs px-2" data-tab="finances" onclick="showTab('finances')"><span class="text-lg">💰</span>Trésorerie</button>
+    <button class="bottombtn flex flex-col items-center gap-0.5 text-xs px-2" onclick="openPlusMenu()"><span class="text-lg">☰</span>Plus</button>
+  </nav>
+
+  <!-- MENU PLUS (mobile) -->
+  <div id="modal-plus-menu" class="fixed inset-0 modal-bg hidden items-end justify-center p-0 z-50 md:hidden">
+    <div class="card w-full max-w-md p-4 rounded-b-none" style="border-radius:16px 16px 0 0">
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="font-display font-bold text-lg" style="color:var(--navy)">Plus</h3>
+        <button onclick="closeModal('modal-plus-menu')">✕</button>
+      </div>
+      <div class="space-y-1">
+        <button class="w-full text-left px-4 py-3 rounded-xl text-sm font-medium bg-gray-50" onclick="showTab('prieres');closeModal('modal-plus-menu')">🙏 Témoignages & Prières</button>
+        <button class="w-full text-left px-4 py-3 rounded-xl text-sm font-medium bg-gray-50" onclick="showTab('guide');closeModal('modal-plus-menu')">📋 Guide du formateur</button>
+        <button class="w-full text-left px-4 py-3 rounded-xl text-sm font-medium bg-gray-50" onclick="showTab('memo');closeModal('modal-plus-menu')">📝 Mémo du formateur</button>
+        <button class="w-full text-left px-4 py-3 rounded-xl text-sm font-medium bg-gray-50" onclick="showTab('evaluation');closeModal('modal-plus-menu')">📊 Évaluation 4C</button>
+        <button class="w-full text-left px-4 py-3 rounded-xl text-sm font-medium bg-gray-50" onclick="showTab('parametres');closeModal('modal-plus-menu')">⚙️ Paramètres</button>
+      </div>
+    </div>
+  </div>
 
   <div class="flex-1 md:ml-64">
 <div id="app" class="max-w-5xl mx-auto px-4">
@@ -105,7 +137,7 @@
           <button class="text-xs btn-gold" onclick="showTab('seances');openSeanceModal()">+ Nouvelle séance</button>
         </div>
         <table class="w-full text-left text-xs">
-          <thead><tr class="border-b text-gray-400 uppercase"><th class="pb-2">Date</th><th>Thème</th><th>N° séance</th><th>Statut</th><th>Présents</th></tr></thead>
+          <thead><tr class="border-b text-gray-400 uppercase text-left"><th class="pb-2 pt-0">Date</th><th class="pb-2">Thème</th><th class="pb-2">N° séance</th><th class="pb-2">Statut</th><th class="pb-2">Présents</th></tr></thead>
           <tbody id="last-seances-table"></tbody>
         </table>
       </div>
@@ -144,7 +176,8 @@
       <select id="filter-statut" onchange="renderDisciples()"><option value="">Tous statuts</option></select>
       <select id="filter-etape" onchange="renderDisciples()"><option value="">Toutes étapes</option></select>
       <button class="btn-outline text-sm" onclick="openConfigModal()">⚙️ Statuts & étapes</button>
-      <button class="btn-outline text-sm" onclick="exportDisciplesCSV()">⬇ Exporter la liste</button>
+      <button class="btn-outline text-sm" onclick="exportDisciplesCSV()">⬇ Exporter Excel (CSV)</button>
+      <button class="btn-outline text-sm" onclick="exportDisciplesPDF()">📄 Exporter PDF</button>
       <button class="btn-gold ml-auto" onclick="openDiscipleModal()">+ Nouveau disciple</button>
     </div>
     <div id="disciples-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
@@ -224,7 +257,7 @@
       <div class="flex justify-between items-start mb-3">
         <div>
           <h3 class="font-display font-semibold" style="color:var(--navy)">Rapport & Bilan de Trésorerie</h3>
-          <p class="text-xs text-gray-500">Ministère de la Parole — Discipulat</p>
+          <p class="text-xs text-gray-500">Mathetēs — Discipulat</p>
         </div>
         <div class="text-right text-xs text-gray-500">
           <div>Période : <b id="periode-label">Ce mois-ci</b></div>
@@ -310,21 +343,53 @@
   </div>
 
   <!-- ============ MEMO ============ -->
-  <section id="tab-memo" class="tab-content">
-    <div class="flex justify-between items-center mb-4">
+  <section id="tab-guide" class="tab-content">
+    <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
       <div>
         <h2 class="font-display font-bold text-xl" style="color:var(--navy)">📋 Guide du Formateur de Disciples</h2>
         <p class="text-xs text-gray-500 italic">Basé sur Éphésiens 4.12 et la notion biblique de Katartismos (Équiper / Restaurer)</p>
       </div>
-      <div>
+      <div class="flex gap-2">
         <button id="guide-edit-btn" class="btn-outline text-sm" onclick="toggleGuideEdit()">✏️ Modifier</button>
         <button id="guide-save-btn" class="btn-navy text-sm hidden" onclick="saveGuide()">Enregistrer le Guide</button>
       </div>
     </div>
 
-    <div id="guide-view" class="space-y-4 mb-8"></div>
-    <div id="guide-edit" class="hidden space-y-4 mb-8"></div>
+    <div id="guide-view" class="space-y-4 mb-4"></div>
+    <div id="guide-edit" class="hidden space-y-4 mb-4"></div>
 
+    <div id="guide-custom-blocks" class="space-y-4 mb-4"></div>
+
+    <button class="btn-outline text-sm" onclick="openCustomBlockModal()">+ Ajouter un cadre personnalisé</button>
+  </section>
+
+  <!-- MODAL CADRE PERSONNALISE -->
+  <div id="modal-custom-block" class="fixed inset-0 modal-bg hidden items-center justify-center p-4 z-50">
+    <div class="card w-full max-w-lg p-5">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-display font-bold text-lg" style="color:var(--navy)">Nouveau cadre personnalisé</h3>
+        <button onclick="closeModal('modal-custom-block')">✕</button>
+      </div>
+      <div class="grid gap-2 mb-3">
+        <input id="cb-titre" placeholder="Titre du cadre">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-xs text-gray-500">Nombre de colonnes</label>
+            <select id="cb-colonnes"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+          </div>
+          <div>
+            <label class="text-xs text-gray-500">Présentation</label>
+            <select id="cb-puces"><option value="non">Texte simple</option><option value="oui">Liste à puces</option></select>
+          </div>
+        </div>
+        <textarea id="cb-contenu" rows="6" placeholder="Un élément par ligne (chaque ligne devient un point de la liste, ou un paragraphe)"></textarea>
+        <button class="btn-gold" onclick="saveCustomBlock()">Enregistrer le cadre</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MEMO ============ -->
+  <section id="tab-memo" class="tab-content">
     <div class="flex justify-between items-center mb-3">
       <h3 class="font-display font-semibold" style="color:var(--navy)">📝 Notes libres</h3>
       <button class="btn-outline text-sm" onclick="openNoteModal()">+ Nouvelle note</button>
@@ -454,7 +519,7 @@
 <div id="pin-lock-screen" class="hidden fixed inset-0 z-[9999] flex-col items-center justify-center gap-4" style="background:var(--navy)">
   <div class="text-white text-center">
     <div class="text-4xl mb-2">🔒</div>
-    <p class="font-display text-lg">Ministère de la Parole</p>
+    <p class="font-display text-lg">Mathetēs</p>
     <p class="text-sm opacity-70">Entrez votre code PIN</p>
   </div>
   <input id="pin-lock-input" type="password" inputmode="numeric" maxlength="4" placeholder="••••" class="text-center text-2xl tracking-widest w-40" style="letter-spacing:.5em">
@@ -653,9 +718,15 @@ function updateAccountUI(){
 function showTab(name){
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.navbtn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.bottombtn').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
-  document.querySelector(`.navbtn[data-tab="${name}"]`).classList.add('active');
+  const nb = document.querySelector(`.navbtn[data-tab="${name}"]`);
+  if(nb) nb.classList.add('active');
+  const bb = document.querySelector(`.bottombtn[data-tab="${name}"]`);
+  if(bb) bb.classList.add('active');
+  window.scrollTo(0,0);
 }
+function openPlusMenu(){ openModal('modal-plus-menu'); }
 function closeModal(id){ document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
 function openModal(id){ document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
 
@@ -670,6 +741,7 @@ async function loadAll(){
   safeRender('renderPrieresTab', renderPrieresTab);
   safeRender('renderTemoignagesList', renderTemoignagesList);
   safeRender('renderGuideView', renderGuideView);
+  safeRender('renderCustomBlocks', renderCustomBlocks);
   safeRender('renderNotesList', renderNotesList);
   safeRender('renderEvaluationTab', renderEvaluationTab);
   safeRender('renderParametres', renderParametres);
@@ -762,13 +834,15 @@ const DEFAULT_GUIDE = {
   reglesOr: [
     "Ne fais jamais durablement seul ce que tu peux faire avec un disciple, et ne fais jamais avec un disciple ce qu'il est désormais capable de faire seul.",
     "On ne mesure pas la force d'un formateur au nombre de disciples qui le suivent, mais au nombre de disciples qu'il rend capables de conduire les autres."
-  ]
+  ],
+  blocsPersonnalises: []
 };
 async function loadMemo(){
   const {data} = await sb.from('ministere_memo').select('*').eq('workspace_id', wid()).limit(1);
   const row = data && data[0];
   memoRowId = row ? row.id : null;
   currentGuide = (row && row.guide_json) ? row.guide_json : JSON.parse(JSON.stringify(DEFAULT_GUIDE));
+  if(!Array.isArray(currentGuide.blocsPersonnalises)) currentGuide.blocsPersonnalises = [];
 }
 let notes = [];
 async function loadNotes(){
@@ -998,8 +1072,14 @@ function renderSuiviList(){
       <span class="flex items-center gap-2">
         <span class="badge" style="background:${s.statut==='Fait'?'#DCEEE1':'#F5D9CD'};color:${s.statut==='Fait'?'var(--ok)':'#A8451F'}">${s.statut}</span>
         ${s.statut==='Prévu'?`<button class="text-xs underline" onclick="markSuiviFait('${s.id}')">Marquer fait</button>`:''}
+        <button class="text-red-400 text-xs" onclick="deleteSuivi('${s.id}')" title="Annuler">✕</button>
       </span></div>`;
   }).join('') || '<p class="text-gray-400">Aucun entretien planifié.</p>';
+}
+async function deleteSuivi(id){
+  if(!confirm('Annuler / supprimer cet entretien ?')) return;
+  await chk(sb.from('ministere_suivis').delete().eq('id', id), 'Suppression suivi');
+  await loadSuivis(); renderSuiviList(); renderDashboard();
 }
 async function addSuivi(){
   const payload = { workspace_id: wid(), disciple_id: document.getElementById('su-disciple').value,
@@ -1279,6 +1359,28 @@ function exportDisciplesCSV(){
   });
   const blob = new Blob([csv], {type:'text/csv'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `disciples_${account}.csv`; a.click();
+}
+function exportDisciplesPDF(){
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'padding:16px;font-family:sans-serif;';
+  wrap.innerHTML = `
+    <h2 style="color:#2D3A2F;margin-bottom:4px;">Liste des disciples — ${account==='adultes'?'Adultes':account==='jeunes'?'Jeunes':'Enfants'}</h2>
+    <p style="color:#666;font-size:12px;margin-bottom:12px;">Généré le ${new Date().toLocaleDateString('fr-FR')} — ${disciples.length} disciple(s)</p>
+    <table style="width:100%;border-collapse:collapse;font-size:11px;">
+      <thead><tr style="background:#F5D9CD;text-align:left;">
+        <th style="padding:6px;border:1px solid #ddd;">Nom</th><th style="padding:6px;border:1px solid #ddd;">Prénom</th>
+        <th style="padding:6px;border:1px solid #ddd;">Statut</th><th style="padding:6px;border:1px solid #ddd;">Étape</th>
+        <th style="padding:6px;border:1px solid #ddd;">Baptisé(e) d'eau</th><th style="padding:6px;border:1px solid #ddd;">Téléphone</th>
+      </tr></thead>
+      <tbody>
+        ${disciples.map(d=>`<tr>
+          <td style="padding:6px;border:1px solid #ddd;">${d.nom||''}</td><td style="padding:6px;border:1px solid #ddd;">${d.prenom||''}</td>
+          <td style="padding:6px;border:1px solid #ddd;">${d.statut||''}</td><td style="padding:6px;border:1px solid #ddd;">${d.etape_parcours||''}</td>
+          <td style="padding:6px;border:1px solid #ddd;">${d.baptise?'Oui':'Non'}</td><td style="padding:6px;border:1px solid #ddd;">${d.telephone||''}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+  html2pdf().set({margin:10, filename:`disciples_${account}.pdf`, jsPDF:{format:'a4'}}).from(wrap).save();
 }
 async function deleteDisciple(){
   const id = document.getElementById('d-id').value;
@@ -1609,6 +1711,59 @@ function renderGuideView(){
       ${g.reglesOr.map(r=>`<p class="text-sm italic mb-1">💡 « ${r} »</p>`).join('')}
     </div>
   `;
+  renderCustomBlocks();
+}
+function renderCustomBlocks(){
+  const g = currentGuide || DEFAULT_GUIDE;
+  const el = document.getElementById('guide-custom-blocks');
+  if(!el) return;
+  const blocs = g.blocsPersonnalises || [];
+  el.innerHTML = blocs.map((b,i)=>{
+    const items = (b.contenu||'').split('\n').filter(Boolean);
+    const colClass = b.colonnes==2?'md:grid-cols-2':b.colonnes==3?'md:grid-cols-3':'';
+    const inner = b.puces==='oui'
+      ? `<ul class="text-sm space-y-1 list-disc pl-5">${items.map(it=>`<li>${it}</li>`).join('')}</ul>`
+      : `<div class="text-sm space-y-1">${items.map(it=>`<p>${it}</p>`).join('')}</div>`;
+    return `<div class="card p-4">
+      <div class="flex justify-between items-start mb-2">
+        <h3 class="font-display font-semibold" style="color:var(--navy)">${b.titre}</h3>
+        <button class="text-red-400 text-xs" onclick="deleteCustomBlock(${i})">✕</button>
+      </div>
+      <div class="grid ${colClass} gap-3">${b.colonnes>1 ? items.map(it=> b.puces==='oui' ? `<ul class="text-sm list-disc pl-5"><li>${it}</li></ul>` : `<p class="text-sm">${it}</p>`).join('') : inner}</div>
+    </div>`;
+  }).join('');
+}
+function openCustomBlockModal(){
+  document.getElementById('cb-titre').value = '';
+  document.getElementById('cb-colonnes').value = '1';
+  document.getElementById('cb-puces').value = 'non';
+  document.getElementById('cb-contenu').value = '';
+  openModal('modal-custom-block');
+}
+async function saveCustomBlock(){
+  const titre = document.getElementById('cb-titre').value.trim();
+  const contenu = document.getElementById('cb-contenu').value.trim();
+  if(!titre || !contenu) return;
+  const g = currentGuide || DEFAULT_GUIDE;
+  if(!Array.isArray(g.blocsPersonnalises)) g.blocsPersonnalises = [];
+  g.blocsPersonnalises.push({ titre, colonnes: Number(document.getElementById('cb-colonnes').value), puces: document.getElementById('cb-puces').value, contenu });
+  currentGuide = g;
+  if(memoRowId) await chk(sb.from('ministere_memo').update({guide_json: g}).eq('id', memoRowId), 'Enregistrement cadre');
+  else {
+    const {data, error} = await sb.from('ministere_memo').insert({workspace_id: wid(), guide_json: g}).select();
+    if(error) showErrorBanner('Enregistrement cadre : '+error.message);
+    else if(data && data[0]) memoRowId = data[0].id;
+  }
+  closeModal('modal-custom-block');
+  renderCustomBlocks();
+}
+async function deleteCustomBlock(index){
+  if(!confirm('Supprimer ce cadre ?')) return;
+  const g = currentGuide || DEFAULT_GUIDE;
+  g.blocsPersonnalises.splice(index,1);
+  currentGuide = g;
+  if(memoRowId) await chk(sb.from('ministere_memo').update({guide_json: g}).eq('id', memoRowId), 'Suppression cadre');
+  renderCustomBlocks();
 }
 function toggleGuideEdit(){
   const editing = !document.getElementById('guide-edit').classList.contains('hidden');
