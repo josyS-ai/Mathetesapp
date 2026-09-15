@@ -2,7 +2,7 @@
   "name": "Mathetēs",
   "short_name": "Mathetēs",
   "description": "Suivi du programme de formation des disciples — Adultes, Jeunes et Enfants",
-  "start_url": "./ministere.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

@@ -1,6 +1,7 @@
-const CACHE_NAME = 'ministere-parole-v2'; // ⚠️ à incrémenter (v3, v4...) à chaque future mise à jour du fichier html
+const CACHE_NAME = 'mathetes-v3'; // ⚠️ à incrémenter (v4, v5...) à chaque future mise à jour du fichier html
 const APP_SHELL = [
-  './ministere.html',
+  './',
+  './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
@@ -26,7 +27,8 @@ self.addEventListener('activate', (event) => {
 // Le cache ne sert que de secours si le téléphone est hors-ligne.
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
-  const isAppShell = APP_SHELL.some((f) => url.pathname.endsWith(f.replace('./', '/')));
+  const isAppShell = event.request.mode === 'navigate' ||
+    APP_SHELL.some((f) => url.pathname.endsWith(f.replace('./', '/')) || url.pathname.endsWith(f.replace('./', '')));
 
   if (isAppShell) {
     event.respondWith(
@@ -35,7 +37,7 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()));
           return response;
         })
-        .catch(() => caches.match(event.request))
+        .catch(() => caches.match(event.request).then((r) => r || caches.match('./index.html')))
     );
   }
   // Les appels vers supabase.co et les CDN externes passent tels quels (réseau).
